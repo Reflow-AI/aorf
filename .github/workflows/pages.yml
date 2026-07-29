@@ -51,6 +51,12 @@ jobs:
         run: test -f _site/demo/signup-conversion/index.html
 
       - uses: actions/configure-pages@v5
+        with:
+          # Creates the Pages site and sets its source to this workflow on the first run, so
+          # the repository provisions its own Pages rather than needing a settings toggle
+          # someone has to remember. Harmless once it already exists.
+          enablement: true
+
       - uses: actions/upload-pages-artifact@v3
         with:
           path: _site

@@ -11,4 +11,5 @@ dist/
 .ruff_cache/
 .mypy_cache/
 site/
+_site/
 .DS_Store
