@@ -23,10 +23,6 @@ jobs:
       BASE: /aorf
     steps:
       - uses: actions/checkout@v4
-        with:
-          # The workflow-mining example keeps source data in git LFS. Without this the
-          # published demo would show pointer files, which is worse than showing nothing.
-          lfs: true
 
       - uses: actions/setup-python@v5
         with:

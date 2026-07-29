@@ -18,12 +18,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          # The examples use git LFS for source data. Without this the checker and any
-          # published dashboard would silently see pointer files instead.
-          lfs: true
           # R18 checks that a hypothesis did not change after an experiment started running,
           # which needs history rather than a shallow clone.
           fetch-depth: 0
+          # No `lfs: true`. Git LFS is advice this format gives to research repositories that
+          # hold real bulk data; this repository holds only small example artifacts, so
+          # nothing here is an LFS pointer.
 
       - uses: actions/setup-python@v5
         with:
