@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}{{ f.title }}{% endblock %}
+{% block content %}
+
+<nav class="crumbs">
+  <a href="{{ page('index') }}">Overview</a><span>/</span>
+  <a href="{{ page('findings') }}">Findings</a><span>/</span>
+  <span class="current">{{ f.severity }}</span>
+</nav>
+
+<header class="doc-head">
+  <h1>{{ f.title }}</h1>
+  <p class="lede">{{ f.description }}</p>
+  <div class="chips">
+    <span class="chip sev-{{ f.severity }}">{{ f.severity }}</span>
+    <span class="chip status-{{ f.status }}">{{ f.status }}</span>
+    <span class="chip">{{ f.scope }}</span>
+    <span class="chip mono">{{ f.discovered }}</span>
+  </div>
+</header>
+
+<section>
+  <dl class="meta">
+    {% if f.source %}<dt>Surfaced</dt><dd>{{ f.source }}</dd>{% endif %}
+    {% if f.affects_links %}
+    <dt>Affects</dt>
+    <dd>
+      {% for a in f.affects_links %}
+      {% if a.resolved %}<a href="{{ a.url }}">{{ a.label }}</a>{% else %}<span class="broken">{{ a.label }}</span>{% endif %}{% if not loop.last %}<br>{% endif %}
+      {% endfor %}
+    </dd>
+    {% endif %}
+  </dl>
+</section>
+
+{% if body %}<section class="prose">{{ body }}</section>{% endif %}
+
+{% endblock %}

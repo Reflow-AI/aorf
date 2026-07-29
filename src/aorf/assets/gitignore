@@ -1,0 +1,17 @@
+# Derived data never enters the repository. If it can be regenerated, the generator plus the
+# command recorded in the dataset's # Provenance section is the record.
+**/derived/
+**/*.parquet
+**/.ipynb_checkpoints/
+
+# Environments and caches
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+
+# Local dashboard output
+site/
+.DS_Store

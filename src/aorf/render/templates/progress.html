@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Progress{% endblock %}
+{% block content %}
+
+<header class="doc-head">
+  <h1>Progress</h1>
+  <p class="lede">Primary metric over time, per question. The reference line is the baseline
+  where one exists, and the question's <span class="mono">metric_target</span> where it does
+  not. Invalidated results are not plotted — they would draw a trend that is not real.</p>
+</header>
+
+{% for p in panels %}
+<section>
+  <div class="section-head">
+    <h2><a href="{{ p.url }}">{{ p.title }}</a> <span class="chip status-{{ p.status }}">{{ p.status }}</span></h2>
+    {% if p.series.metric %}<span class="mono sub">{{ p.series.metric }}</span>{% endif %}
+  </div>
+  {{ progress_chart(p.series) | safe }}
+</section>
+{% else %}
+<p class="empty">No questions to plot.</p>
+{% endfor %}
+
+{% endblock %}

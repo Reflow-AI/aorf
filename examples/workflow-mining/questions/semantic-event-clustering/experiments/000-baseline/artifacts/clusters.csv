@@ -1,0 +1,6 @@
+cluster_id,size,dominant_task,purity
+0,412,google_login,0.91
+1,388,jira_ticket_update,0.64
+2,301,email_triage,0.58
+3,266,doc_editing,0.72
+4,190,mixed,0.31

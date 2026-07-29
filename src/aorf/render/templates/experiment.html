@@ -1,0 +1,181 @@
+{% extends "base.html" %}
+{% block title %}{{ e.id }} · {{ e.title }}{% endblock %}
+{% block content %}
+
+<nav class="crumbs">
+  <a href="{{ page('index') }}">Overview</a>
+  {% if question %}<span>/</span><a href="{{ question.url }}">{{ question.label }}</a>{% endif %}
+  <span>/</span><span class="current mono">{{ e.id }}</span>
+</nav>
+
+<header class="doc-head">
+  <h1>{{ e.title }}</h1>
+  <p class="lede">{{ e.description }}</p>
+  <div class="chips">
+    <span class="chip kind">{{ e.kind.replace('_', ' ') }}</span>
+    <span class="chip status-{{ e.status }}">{{ e.status }}</span>
+    {% if e.verdict %}<span class="chip verdict-{{ e.verdict | replace('/', '-') }}">{{ e.verdict }}</span>{% endif %}
+    {% if e.verdict_state != 'current' %}<span class="chip warn">{{ e.verdict_state }}</span>{% endif %}
+    {% if e.owner %}<span class="chip">{{ e.owner }}</span>{% endif %}
+    {% if e.tracker %}<span class="chip mono">{{ e.tracker }}</span>{% endif %}
+    {% for t in e.tags %}<span class="chip tag">{{ t }}</span>{% endfor %}
+  </div>
+</header>
+
+{% if e.verdict_state == 'invalidated' %}
+<div class="banner blocking">
+  <strong>This result is invalidated.</strong> {{ e.invalidation_reason }}
+  {% if links.invalidated_by %}<div class="sub">See <a href="{{ links.invalidated_by.url }}">{{ links.invalidated_by.label }}</a>.</div>{% endif %}
+</div>
+{% elif e.verdict_state == 'superseded' %}
+<div class="banner abandoned">
+  <strong>Superseded.</strong>
+  {% if links.superseded_by %}Replaced by <a href="{{ links.superseded_by.url }}">{{ links.superseded_by.label }}</a>.{% endif %}
+</div>
+{% endif %}
+
+{% if e.status in ('blocked', 'abandoned') and e.status_reason %}
+<div class="banner abandoned"><strong>{{ e.status | capitalize }}.</strong> {{ e.status_reason }}</div>
+{% endif %}
+
+{% if e.hypothesis %}
+<section class="hypothesis">
+  <span class="label">Hypothesis</span>
+  <blockquote>{{ e.hypothesis }}</blockquote>
+  {% if e.verdict_scope %}<p class="sub"><strong>Holds under:</strong> {{ e.verdict_scope }}</p>{% endif %}
+  {% if e.verdict_basis %}<p class="sub"><strong>Basis:</strong> {{ e.verdict_basis }}</p>{% endif %}
+</section>
+{% elif e.kind == 'baseline' %}
+<section class="hypothesis">
+  <span class="label">Baseline</span>
+  <p class="sub">A baseline measures rather than asserts, so it carries no hypothesis and no
+  verdict. Its job is to give everything after it a number to beat.</p>
+</section>
+{% endif %}
+
+{% if e.metrics %}
+<section>
+  <h2>Metrics</h2>
+  <div class="scroll">
+  <table class="data">
+    <thead><tr>
+      <th>Metric</th><th class="num">Value</th><th class="num">Baseline</th>
+      <th class="num">Delta</th><th>Direction</th><th class="num">n</th><th>CI</th><th class="num">std</th>
+    </tr></thead>
+    <tbody>
+    {% for m in e.metrics %}
+    <tr class="{{ 'primary-row' if loop.first and e.primary and m.name == e.primary.name else '' }}">
+      <td class="mono">{{ m.name }}{% if e.primary and m.name == e.primary.name %} <span class="chip">primary</span>{% endif %}</td>
+      <td class="num">{{ m.value | num }}{% if m.unit %} <span class="sub">{{ m.unit }}</span>{% endif %}</td>
+      <td class="num">{{ m.baseline_value | num }}</td>
+      <td class="num">
+        {% if m.delta is not none %}
+        <span class="{{ 'up' if m.delta >= 0 else 'down' }}">{{ m.delta | delta }}</span>
+        {% else %}—{% endif %}
+      </td>
+      <td class="sub">{{ m.direction.replace('_', ' ') }}</td>
+      <td class="num">{{ m.n | num }}</td>
+      <td class="mono">{% if m.ci %}[{{ m.ci[0] | num }}, {{ m.ci[1] | num }}]{% else %}—{% endif %}</td>
+      <td class="num">{{ m.std | num }}</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</section>
+{% endif %}
+
+<section>
+  <h2>Provenance</h2>
+  <dl class="meta">
+    <dt>Baseline</dt>
+    <dd>
+      {% if links.baseline %}<a href="{{ links.baseline.url }}">{{ links.baseline.label }}</a>
+      {% else %}<span class="muted">none</span> — {{ e.baseline_reason }}{% endif %}
+    </dd>
+
+    {% if datasets %}
+    <dt>Datasets</dt>
+    <dd>
+      {% for d in datasets %}
+      {% if d.resolved %}<a href="{{ d.url }}">{{ d.label }}</a>{% else %}<span class="broken">{{ d.label }}</span>{% endif %}
+      <span class="mono sub">{{ d.version }} · {{ d.role }}{% if d.status and d.status != 'stable' %} · {{ d.status }}{% endif %}</span>{% if not loop.last %}<br>{% endif %}
+      {% endfor %}
+    </dd>
+    {% endif %}
+
+    {% if e.models %}
+    <dt>Models</dt>
+    <dd>
+      {% for m in e.models %}
+      <span class="mono">{{ m.provider }}/{{ m.id }}</span>
+      <span class="sub">snapshot {{ m.snapshot }}{% if m.params %} · {{ m.params }}{% endif %}</span>{% if not loop.last %}<br>{% endif %}
+      {% endfor %}
+    </dd>
+    {% endif %}
+
+    <dt>Ran</dt>
+    <dd class="mono">{{ e.run_date or '—' }}
+      {% if e.runtime_s is not none %}<span class="sub">· {{ e.runtime_s }}s</span>{% endif %}
+      {% if e.cost_usd is not none %}<span class="sub">· ${{ e.cost_usd }}</span>{% endif %}
+      {% if e.nondeterministic %}<span class="chip">nondeterministic{% if e.repeats %}, {{ e.repeats }} repeats{% endif %}</span>{% endif %}
+    </dd>
+
+    {% if e.code %}
+    <dt>Code</dt>
+    <dd class="mono">{{ e.code.get('commit', '—') }}
+      {% if e.code.get('entrypoint') %}<span class="sub">· {{ e.code.entrypoint }}</span>{% endif %}
+      {% if e.code.get('shared_ref') %}<span class="sub">· shared {{ e.code.shared_ref }}</span>{% endif %}
+      {% if e.code.get('dirty') %}<span class="chip warn">dirty tree</span>{% endif %}
+    </dd>
+    {% endif %}
+
+    {% if e.env %}
+    <dt>Environment</dt>
+    <dd class="mono">{% for k, v in e.env.items() %}{{ k }}: {{ v }}{% if not loop.last %} · {% endif %}{% endfor %}</dd>
+    {% endif %}
+
+    {% if links.retests %}
+    <dt>Retests</dt>
+    <dd><a href="{{ links.retests.url }}">{{ links.retests.label }}</a>
+      <span class="sub">{{ e.get('retest_reason', '') }}</span></dd>
+    {% endif %}
+
+    {% if links.supersedes %}
+    <dt>Supersedes</dt>
+    <dd><a href="{{ links.supersedes.url }}">{{ links.supersedes.label }}</a></dd>
+    {% endif %}
+
+    {% if also_informs %}
+    <dt>Also informs</dt>
+    <dd>{% for a in also_informs %}<a href="{{ a.url }}">{{ a.label }}</a>{% if not loop.last %}, {% endif %}{% endfor %}</dd>
+    {% endif %}
+  </dl>
+</section>
+
+{% if body %}<section class="prose">{{ body }}</section>{% endif %}
+
+{% if runs %}
+<section>
+  <h2>Sweep runs <span class="sub">{{ e.run_count or runs | length }} configuration(s){% if e.best_run %}, best {{ e.best_run }}{% endif %}</span></h2>
+  {% if scatter %}{{ scatter | safe }}{% endif %}
+</section>
+{% endif %}
+
+{% if artifacts %}
+<section>
+  <h2>Artifacts</h2>
+  {% for item in artifacts %}
+  <article class="artifact">
+    <header>
+      <span class="mono">{{ item.artifact.name }}</span>
+      <span class="sub">{{ item.artifact.kind }}</span>
+      <a class="muted" href="{{ item.artifact.url }}" download>download</a>
+    </header>
+    {{ item.html | safe }}
+  </article>
+  {% endfor %}
+</section>
+{% endif %}
+
+{% endblock %}

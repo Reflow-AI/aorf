@@ -1,0 +1,6 @@
+run_id,model,threshold,preprocess,ari,std
+r003,e5-large-v2,0.70,raw,0.55,0.05
+r012,e5-large-v2,0.85,normalized,0.66,0.03
+r019,gte-large,0.80,normalized,0.68,0.04
+r031,bge-large-en-v1.5,0.85,normalized,0.71,0.04
+r038,openai-3-large,0.90,normalized,0.70,0.03

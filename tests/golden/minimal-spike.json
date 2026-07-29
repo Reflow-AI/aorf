@@ -1,0 +1,101 @@
+{
+  "aorf_version": "0.1",
+  "datasets": [],
+  "findings": [],
+  "ledger": [
+    {
+      "hypothesis": "An LLM labelling screenshots from a fixed prompt agrees with human labels at least 90% of the time.",
+      "id": "001-gpt-labeling-spike",
+      "invalidation_reason": "",
+      "kind": "hypothesis_test",
+      "metric": {
+        "baseline_value": null,
+        "ci": [
+          0.81,
+          0.9
+        ],
+        "delta": null,
+        "direction": "higher_is_better",
+        "n": 200.0,
+        "name": "agreement",
+        "std": null,
+        "unit": "",
+        "value": 0.86
+      },
+      "owner": "",
+      "question_rel": "questions/llm-agreement/index.md",
+      "question_title": "Does an LLM agree with human labels on screenshots?",
+      "rel": "questions/llm-agreement/experiments/001-gpt-labeling-spike/index.md",
+      "run_date": "2026-07-26",
+      "status": "done",
+      "tags": [],
+      "verdict": "inconclusive",
+      "verdict_scope": "200 screenshots, single prompt, one model snapshot",
+      "verdict_state": "current"
+    }
+  ],
+  "log": "",
+  "questions": [
+    {
+      "answer": "",
+      "best": {
+        "id": "001-gpt-labeling-spike",
+        "metric": {
+          "baseline_value": null,
+          "ci": [
+            0.81,
+            0.9
+          ],
+          "delta": null,
+          "direction": "higher_is_better",
+          "n": 200.0,
+          "name": "agreement",
+          "std": null,
+          "unit": "",
+          "value": 0.86
+        },
+        "rel": "questions/llm-agreement/experiments/001-gpt-labeling-spike/index.md",
+        "title": "First pass LLM labelling on 200 screenshots"
+      },
+      "children": [],
+      "closed_reason": "",
+      "depth": 1,
+      "description": "Measure agreement between LLM-produced labels and the existing human labels.",
+      "experiment_count": 1,
+      "hypotheses_tested": 1,
+      "invalidated_count": 0,
+      "last_activity": "2026-07-26",
+      "metric_direction": "higher_is_better",
+      "metric_target": 0.9,
+      "owner": "",
+      "primary_metric": "agreement",
+      "prior_art": null,
+      "reference": {
+        "kind": "target",
+        "rel": "",
+        "value": 0.9
+      },
+      "rel": "questions/llm-agreement/index.md",
+      "slug": "llm-agreement",
+      "status": "active",
+      "synthesis": "",
+      "tags": [],
+      "title": "Does an LLM agree with human labels on screenshots?",
+      "tracker": ""
+    }
+  ],
+  "research": {
+    "body": "\n# Problem statement\nHand-labelling screenshots for the action detection training set costs about 6 hours per 1000 images.\n\n# Goal and success criteria\nDecide, within two days, whether an LLM can label at 90% agreement with a human. If yes, we stop hand-labelling.\n\n# Questions\n- [Does an LLM agree with human labels on screenshots?](questions/llm-agreement/index.md) (active)\n",
+    "declared_version": "0.1",
+    "description": "Two day spike to find out whether we can stop hand-labelling screenshots.",
+    "headline": null,
+    "metric_direction": "",
+    "metric_target": null,
+    "primary_metric": "",
+    "rel": "index.md",
+    "status": "active",
+    "tag_vocabulary": [],
+    "tags": [],
+    "title": "Can an LLM label screenshots well enough to skip manual annotation?"
+  }
+}

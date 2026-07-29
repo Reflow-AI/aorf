@@ -1,0 +1,10 @@
+# Derived data is never committed. Regenerate with shared/build_events.py
+datasets/derived/
+**/artifacts/cache/
+*.tmp
+
+# Local environment
+.venv/
+__pycache__/
+
+# NOTE: raw source data is NOT ignored. It is tracked with git LFS, see .gitattributes

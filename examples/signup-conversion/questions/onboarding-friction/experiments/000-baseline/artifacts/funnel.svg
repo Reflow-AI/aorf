@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 160" width="400" height="160">
+  <rect x="0" y="0" width="400" height="160" fill="#fff"/>
+  <text x="10" y="18" font-family="sans-serif" font-size="12" fill="#111">Funnel drop-off by step</text>
+  <rect x="10" y="30" width="380" height="18" fill="#4c78a8"/>
+  <rect x="10" y="54" width="281" height="18" fill="#4c78a8"/>
+  <rect x="10" y="78" width="224" height="18" fill="#e45756"/>
+  <rect x="10" y="102" width="132" height="18" fill="#4c78a8"/>
+  <rect x="10" y="126" width="112" height="18" fill="#54a24b"/>
+  <text x="300" y="92" font-family="sans-serif" font-size="10" fill="#e45756">41% lost here</text>
+</svg>

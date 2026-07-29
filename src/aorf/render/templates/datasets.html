@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}Datasets{% endblock %}
+{% block content %}
+
+<header class="doc-head">
+  <h1>Datasets</h1>
+  <p class="lede">Versions and supersession chains. A dataset referenced by any completed
+  experiment is immutable: a fix creates a new version rather than editing the old one, so
+  results stay attached to the data they were computed on.</p>
+</header>
+
+{% if datasets %}
+<div class="scroll">
+<table class="data">
+  <thead><tr>
+    <th>Dataset</th><th>Version</th><th>Status</th><th>Origin</th>
+    <th>Storage</th><th class="num">Rows</th><th>Created</th><th>Chain</th>
+  </tr></thead>
+  <tbody>
+  {% for d in datasets %}
+  <tr class="{{ 'struck' if d.status == 'deprecated' else '' }}">
+    <td>
+      <a href="{{ dataset_url(d.rel) }}">{{ d.title }}</a>
+      <span class="sub">{{ d.description }}</span>
+      {% if d.defect %}<span class="sub warn">{{ d.defect }}</span>{% endif %}
+    </td>
+    <td class="mono">{{ d.version }}</td>
+    <td><span class="chip status-{{ d.status }}">{{ d.status }}</span></td>
+    <td>
+      {% if d.generated %}<span class="chip">generated</span>
+      <span class="sub mono">{{ d.generator }}</span>
+      {% else %}<span class="chip">source</span>{% endif %}
+    </td>
+    <td class="mono">{{ d.storage }}</td>
+    <td class="num">{{ d.row_count | num }}</td>
+    <td class="mono">{{ d.created or '—' }}</td>
+    <td class="sub">
+      {% if d.supersedes_link %}replaces <a href="{{ d.supersedes_link.url }}">{{ d.supersedes_link.label }}</a>{% endif %}
+      {% if d.superseded_by_link %}replaced by <a href="{{ d.superseded_by_link.url }}">{{ d.superseded_by_link.label }}</a>{% endif %}
+      {% if not d.supersedes_link and not d.superseded_by_link %}—{% endif %}
+    </td>
+  </tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+<p class="note">A generated dataset carries <span class="mono">storage: none</span> and is
+gitignored: if it can be regenerated it does not belong in the repository, and the
+<span class="mono">generator</span> plus the command in its Provenance section is the record.
+Source data that cannot be regenerated is committed via git LFS so the repo has no external
+dependency.</p>
+{% else %}
+<p class="empty">No datasets referenced yet. They appear when an experiment points at data.</p>
+{% endif %}
+
+{% endblock %}
