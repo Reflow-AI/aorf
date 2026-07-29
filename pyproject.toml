@@ -1,0 +1,52 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "aorf"
+version = "0.1.0"
+description = "Track research questions, hypotheses and verdicts in plain markdown, so agents and teammates can see what you tried and what happened."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { file = "LICENSE" }
+authors = [{ name = "Reflow AI" }]
+keywords = ["research", "experiments", "hypothesis", "okf", "agents"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Science/Research",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Topic :: Scientific/Engineering",
+]
+dependencies = ["pyyaml>=6.0", "markdown-it-py>=3.0", "jinja2>=3.1"]
+
+[project.urls]
+Homepage = "https://reflow-ai.github.io/aorf/"
+Source = "https://github.com/Reflow-AI/aorf"
+Specification = "https://reflow-ai.github.io/aorf/spec/"
+
+[project.scripts]
+aorf = "aorf.cli:main"
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0", "ruff>=0.6"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/aorf"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+
+[tool.ruff.lint.isort]
+# conftest is imported bare by the tests, so treat it as ours rather than third-party.
+known-first-party = ["aorf", "conftest"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

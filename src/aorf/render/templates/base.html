@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}{{ research.title }}{% endblock %} · AORF</title>
+<link rel="stylesheet" href="{{ static_url('aorf.css') }}">
+</head>
+<body>
+<header class="top">
+  <a class="brand" href="{{ page('index') }}">
+    <strong>{{ research.title or 'Untitled research' }}</strong>
+    <span class="chip status-{{ research.status }}">{{ research.status or 'unknown' }}</span>
+  </a>
+  <nav>
+    {% for label, href in nav %}
+    <a href="{{ href }}"{% if request_path == href %} class="here"{% endif %}>{{ label }}</a>
+    {% endfor %}
+  </nav>
+</header>
+
+{% if blocking %}
+<div class="banner blocking">
+  <strong>{{ blocking | length }} open blocking finding{{ '' if blocking | length == 1 else 's' }}.</strong>
+  Results touching these may not be trustworthy.
+  <ul>
+    {% for f in blocking %}
+    <li><a href="{{ finding_url(f.rel) }}">{{ f.title }}</a> — {{ f.description }}</li>
+    {% endfor %}
+  </ul>
+</div>
+{% endif %}
+
+<main>
+{% block content %}{% endblock %}
+</main>
+
+<footer>
+  <span>AORF v{{ aorf_version }}{% if research.declared_version and research.declared_version != aorf_version %}
+    · repo declares v{{ research.declared_version }}{% endif %}</span>
+  <span>Rendered by <code>aorf</code>. Read-only; nothing here executes.</span>
+</footer>
+<script src="{{ static_url('filter.js') }}" defer></script>
+</body>
+</html>

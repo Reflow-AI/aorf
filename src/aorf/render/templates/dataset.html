@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}{{ d.title }}{% endblock %}
+{% block content %}
+
+<nav class="crumbs">
+  <a href="{{ page('index') }}">Overview</a><span>/</span>
+  <a href="{{ page('datasets') }}">Datasets</a><span>/</span>
+  <span class="current mono">{{ d.version }}</span>
+</nav>
+
+<header class="doc-head">
+  <h1>{{ d.title }}</h1>
+  <p class="lede">{{ d.description }}</p>
+  <div class="chips">
+    <span class="chip mono">{{ d.version }}</span>
+    <span class="chip status-{{ d.status }}">{{ d.status }}</span>
+    <span class="chip">{{ 'generated' if d.generated else 'source' }}</span>
+    <span class="chip mono">storage: {{ d.storage }}</span>
+    {% if d.row_count is not none %}<span class="chip">{{ d.row_count }} rows</span>{% endif %}
+  </div>
+</header>
+
+{% if d.status == 'deprecated' %}
+<div class="banner blocking">
+  <strong>Withdrawn.</strong> {{ d.defect }}
+  {% if d.superseded_by_link %}
+  <div class="sub">Use <a href="{{ d.superseded_by_link.url }}">{{ d.superseded_by_link.label }}</a> instead.</div>
+  {% endif %}
+</div>
+{% endif %}
+
+<section>
+  <dl class="meta">
+    <dt>Resource</dt><dd class="mono break">{{ d.resource }}</dd>
+    {% if d.generated %}<dt>Generator</dt><dd class="mono">{{ d.generator }}</dd>{% endif %}
+    {% if d.checksum %}<dt>Checksum</dt><dd class="mono break">{{ d.checksum }}</dd>{% endif %}
+    {% if d.created %}<dt>Created</dt><dd class="mono">{{ d.created }}</dd>{% endif %}
+    {% if d.supersedes_link %}
+    <dt>Replaces</dt><dd><a href="{{ d.supersedes_link.url }}">{{ d.supersedes_link.label }}</a></dd>
+    {% endif %}
+    {% if d.superseded_by_link %}
+    <dt>Replaced by</dt><dd><a href="{{ d.superseded_by_link.url }}">{{ d.superseded_by_link.label }}</a></dd>
+    {% endif %}
+  </dl>
+</section>
+
+{% if used_by %}
+<section>
+  <h2>Used by</h2>
+  <ul class="plain">
+    {% for u in used_by %}
+    <li><a href="{{ u.url }}" class="mono">{{ u.id }}</a> {{ u.label }} <span class="sub">{{ u.role }}</span></li>
+    {% endfor %}
+  </ul>
+  <p class="note">Because these experiments are attached to this version, it is immutable. A
+  correction becomes a new version with <span class="mono">supersedes</span>.</p>
+</section>
+{% endif %}
+
+{% if body %}<section class="prose">{{ body }}</section>{% endif %}
+
+{% endblock %}

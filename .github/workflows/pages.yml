@@ -1,0 +1,70 @@
+name: Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# A queued deploy should replace a pending one rather than stack up behind it.
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    # A project site is served under /<repo>/, so every root-relative link needs that prefix.
+    env:
+      BASE: /aorf
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # The workflow-mining example keeps source data in git LFS. Without this the
+          # published demo would show pointer files, which is worse than showing nothing.
+          lfs: true
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - run: pip install -e .
+
+      - name: The demo must be real, so it has to validate first
+        run: |
+          for dir in examples/*/; do
+            aorf check "$dir" --strict
+          done
+
+      - name: Build the website
+        run: python docs/build_site.py --out _site --base "$BASE"
+
+      - name: Build the live demos with aorf build
+        # Not a mockup: these pages are the actual tool's output over the example repos.
+        run: |
+          for dir in examples/signup-conversion examples/workflow-mining examples/minimal-spike; do
+            name="$(basename "$dir")"
+            aorf build "$dir" --out "_site/demo/$name" --base "$BASE/demo/$name"
+          done
+
+      - name: Fail if the demo the landing page embeds is missing
+        run: test -f _site/demo/signup-conversion/index.html
+
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Findings{% endblock %}
+{% block content %}
+
+<header class="doc-head">
+  <h1>Findings</h1>
+  <p class="lede">Things learned that are not experiment results: a data defect, a model that
+  changed underneath you, an incidental discovery. Recorded because they invalidate work, and
+  an unrecorded one invalidates it silently.</p>
+</header>
+
+{% for state in ['open', 'resolved'] %}
+{% set group = findings | selectattr('status', 'equalto', state) | list %}
+{% if group %}
+<section>
+  <h2>{{ state | capitalize }} <span class="sub">{{ group | length }}</span></h2>
+  <ul class="findings">
+    {% for f in group %}
+    <li class="sev-{{ f.severity }}">
+      <div class="row">
+        <a href="{{ finding_url(f.rel) }}"><strong>{{ f.title }}</strong></a>
+        <span class="chip sev-{{ f.severity }}">{{ f.severity }}</span>
+        <span class="chip">{{ f.scope }}</span>
+        <span class="mono sub">{{ f.discovered }}</span>
+      </div>
+      <p>{{ f.description }}</p>
+      {% if f.source %}<p class="sub">Surfaced: {{ f.source }}</p>{% endif %}
+      {% if f.affects_links %}
+      <p class="sub">Affects:
+        {% for a in f.affects_links %}
+        {% if a.resolved %}<a href="{{ a.url }}">{{ a.label }}</a>{% else %}<span class="broken">{{ a.label }}</span>{% endif %}{% if not loop.last %}, {% endif %}
+        {% endfor %}
+      </p>
+      {% endif %}
+    </li>
+    {% endfor %}
+  </ul>
+</section>
+{% endif %}
+{% endfor %}
+
+{% if not findings %}
+<p class="empty">Nothing recorded yet. This file appears when something is discovered, not before.</p>
+{% endif %}
+
+{% endblock %}

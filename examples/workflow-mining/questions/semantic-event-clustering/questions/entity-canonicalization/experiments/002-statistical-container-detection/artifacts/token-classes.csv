@@ -1,0 +1,6 @@
+token,doc_frequency,cardinality,class,action
+CASE-40192,0.004,4021,entity,mask
+Case Tracker,0.981,1,container,keep
+In Progress,0.412,6,enum,normalise
+John Doe,0.002,388,entity,mask
+Ready for QA,0.377,6,enum,normalise

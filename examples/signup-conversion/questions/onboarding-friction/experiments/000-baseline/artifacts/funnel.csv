@@ -1,0 +1,6 @@
+step,entered,completed,drop_rate
+landing,10000,7400,0.260
+signup_form,7400,5900,0.203
+card_entry,5900,3480,0.410
+activation,3480,2950,0.152
+paid,2950,2801,0.050

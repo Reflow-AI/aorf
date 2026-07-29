@@ -1,0 +1,174 @@
+{% extends "base.html" %}
+{% block title %}{{ q.title }}{% endblock %}
+{% block content %}
+
+<nav class="crumbs">
+  <a href="{{ page('index') }}">Overview</a>
+  {% if parent %}<span>/</span><a href="{{ parent.url }}">{{ parent.label }}</a>{% endif %}
+  <span>/</span><span class="current">{{ q.slug }}</span>
+</nav>
+
+<header class="doc-head">
+  <h1>{{ q.title }}</h1>
+  <p class="lede">{{ q.description }}</p>
+  <div class="chips">
+    <span class="chip status-{{ q.status }}">{{ q.status }}</span>
+    {% if q.primary_metric %}<span class="chip mono">{{ q.primary_metric }}{% if q.metric_direction %} · {{ q.metric_direction.replace('_', ' ') }}{% endif %}</span>{% endif %}
+    {% if q.metric_target is not none %}<span class="chip">target {{ q.metric_target | num }}</span>{% endif %}
+    {% if q.owner %}<span class="chip">{{ q.owner }}</span>{% endif %}
+    {% if q.tracker %}<span class="chip mono">{{ q.tracker }}</span>{% endif %}
+    {% for t in q.tags %}<span class="chip tag">{{ t }}</span>{% endfor %}
+  </div>
+</header>
+
+{% if q.status == 'answered' %}
+<div class="banner answered">
+  <strong>Answered.</strong> {{ q.answer }}
+  {% if evidence %}
+  <div class="sub">Evidence:
+    {% for e in evidence %}
+      {% if e.resolved %}<a href="{{ e.url }}">{{ e.label }}</a>{% else %}<span class="broken">{{ e.label }}</span>{% endif %}{% if not loop.last %}, {% endif %}
+    {% endfor %}
+  </div>
+  {% endif %}
+</div>
+{% elif q.status == 'abandoned' %}
+<div class="banner abandoned"><strong>Abandoned.</strong> {{ q.closed_reason }}</div>
+{% endif %}
+
+<section class="cards">
+  <div class="card">
+    <span class="label">Current best</span>
+    {% if q.best %}
+    <a class="value" href="{{ experiment_url(q.best.rel) }}">{{ q.best.metric.value | num }}</a>
+    <span class="sub">{{ q.best.id }}{% if q.best.metric.delta is not none %} · <span class="{{ 'up' if q.best.metric.delta >= 0 else 'down' }}">{{ q.best.metric.delta | delta }}</span> vs baseline{% endif %}</span>
+    {% else %}
+    <span class="value muted">—</span>
+    <span class="sub">no completed non-baseline result yet</span>
+    {% endif %}
+  </div>
+  <div class="card">
+    <span class="label">Reference</span>
+    {% if q.reference %}
+    <span class="value">{{ q.reference.value | num }}</span>
+    <span class="sub">{{ 'baseline' if q.reference.kind == 'baseline' else 'metric_target, no baseline' }}</span>
+    {% else %}
+    <span class="value muted">—</span>
+    <span class="sub">no baseline and no target; nothing to judge against</span>
+    {% endif %}
+  </div>
+  <div class="card">
+    <span class="label">Hypotheses tested</span>
+    <span class="value">{{ q.hypotheses_tested }}</span>
+    <span class="sub">{{ q.experiment_count }} experiment(s){% if q.invalidated_count %}, <span class="warn">{{ q.invalidated_count }} invalidated</span>{% endif %}</span>
+  </div>
+  <div class="card">
+    <span class="label">Prior art</span>
+    {% if q.prior_art %}
+    <span class="chip-value conc-{{ q.prior_art.conclusion }}">{{ q.prior_art.conclusion.replace('_', ' ') }}</span>
+    <span class="sub">searched {{ q.prior_art.searched_on }}{% if q.prior_art.cost_usd is not none %} · ${{ q.prior_art.cost_usd }}{% endif %}{% if q.prior_art.valid_until %} · valid until {{ q.prior_art.valid_until }}{% endif %}</span>
+    {% else %}
+    <span class="value muted">—</span>
+    <span class="sub">no search recorded</span>
+    {% endif %}
+  </div>
+</section>
+
+{% if body %}<section class="prose">{{ body }}</section>{% endif %}
+
+<section>
+  <h2>Experiments</h2>
+  {% if q.groups %}
+    {% for g in q.groups %}
+    <div class="group {{ 'invalidated' if g.invalidated else '' }}">
+      <h3>
+        {% if g.invalidated %}<s>{{ g.label }}</s> <span class="chip warn">invalidated</span>
+        {% else %}{{ g.label }}{% endif %}
+      </h3>
+      <div class="scroll">
+      <table class="data">
+        <thead><tr>
+          <th>Experiment</th><th>Hypothesis</th><th>Verdict</th>
+          <th class="num">Value</th><th class="num">Delta</th>
+          <th>Dataset</th><th>Ran</th><th>Owner</th>
+        </tr></thead>
+        <tbody>
+        {% for r in g.rows %}
+        <tr class="{{ 'struck' if r.verdict_state != 'current' else '' }}">
+          <td>
+            <a href="{{ experiment_url(r.rel) }}" class="mono">{{ r.id }}</a>
+            <span class="sub">{{ r.title }}</span>
+          </td>
+          <td class="hyp">{{ r.hypothesis or ('(baseline)' if r.kind == 'baseline' else '—') }}</td>
+          <td>
+            <span class="chip verdict-{{ r.verdict | replace('/', '-') }}">{{ r.verdict or r.status }}</span>
+            {% if r.verdict_state != 'current' %}<span class="chip warn">{{ r.verdict_state }}</span>{% endif %}
+          </td>
+          <td class="num">{% if r.primary %}{{ r.primary.value | num }}{% else %}—{% endif %}</td>
+          <td class="num">
+            {% if r.primary and r.primary.delta is not none %}
+              <span class="{{ 'up' if r.primary.delta >= 0 else 'down' }}">{{ r.primary.delta | delta }}</span>
+            {% else %}—{% endif %}
+          </td>
+          <td class="mono">{{ r.dataset_versions | join(', ') or '—' }}</td>
+          <td class="mono">{{ r.run_date or '—' }}</td>
+          <td>{{ r.owner or '—' }}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+      </div>
+      {% if g.invalidated %}
+        {% for r in g.rows %}{% if r.invalidation_reason %}
+        <p class="empty">{{ r.id }}: {{ r.invalidation_reason }}</p>
+        {% endif %}{% endfor %}
+      {% endif %}
+    </div>
+    {% endfor %}
+    {% if q.groups | length > 1 %}
+    <p class="note">Rows are partitioned by comparability group
+      <span class="mono">(primary_metric, dataset_version, baseline)</span>. Numbers from
+      different groups are not comparable and never share a column.</p>
+    {% endif %}
+  {% else %}
+  <p class="empty">No experiments under this question yet.</p>
+  {% endif %}
+</section>
+
+{% if q.progress.points %}
+<section>
+  <h2>Progress</h2>
+  {{ progress_chart(q.progress) | safe }}
+</section>
+{% endif %}
+
+{% if q.child_rows %}
+<section>
+  <h2>Sub-questions</h2>
+  <ul class="plain">
+    {% for c in q.child_rows %}
+    <li>
+      <a href="{{ question_url(c.rel) }}">{{ c.title }}</a>
+      <span class="chip status-{{ c.status }}">{{ c.status }}</span>
+      <span class="sub">{{ c.description }}</span>
+    </li>
+    {% endfor %}
+  </ul>
+</section>
+{% endif %}
+
+{% if prior_art_body %}
+<section>
+  <h2>Prior art</h2>
+  <div class="prose">{{ prior_art_body }}</div>
+</section>
+{% endif %}
+
+{% if synthesis_body %}
+<section>
+  <h2>Synthesis</h2>
+  <details><summary>{{ q.synthesis }}</summary><div class="prose">{{ synthesis_body }}</div></details>
+</section>
+{% endif %}
+
+{% endblock %}

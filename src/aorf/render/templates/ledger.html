@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}Hypothesis ledger{% endblock %}
+{% block content %}
+
+<header class="doc-head">
+  <h1>Hypothesis ledger</h1>
+  <p class="lede">Every hypothesis in this repository, with what happened to it. This is the
+  answer to "what have we already tried" — including the ones that were refuted, and the ones
+  whose numbers later turned out not to count.</p>
+</header>
+
+<div class="section-head">
+  <div class="chips">
+    <span class="chip">{{ rows | length }} hypothes{{ 'is' if rows | length == 1 else 'es' }}</span>
+    {% for v in verdicts %}
+    <span class="chip verdict-{{ v | replace('/', '-') }}">{{ v }}: {{ rows | selectattr('verdict', 'equalto', v) | list | length }}</span>
+    {% endfor %}
+    {% set inval = rows | rejectattr('verdict_state', 'equalto', 'current') | list | length %}
+    {% if inval %}<span class="chip warn">not current: {{ inval }}</span>{% endif %}
+  </div>
+  <input class="filter" data-filter-target="#ledger" type="search" placeholder="Filter hypotheses" aria-label="Filter hypotheses">
+</div>
+
+{% if rows %}
+<div class="scroll">
+<table class="data" id="ledger">
+  <thead><tr>
+    <th>Hypothesis</th><th>Question</th><th>Verdict</th>
+    <th class="num">Value</th><th class="num">Delta</th><th>Ran</th><th>Owner</th>
+  </tr></thead>
+  <tbody>
+  {% for r in rows %}
+  <tr class="{{ 'struck' if r.verdict_state != 'current' else '' }}">
+    <td class="hyp">
+      <a href="{{ experiment_url(r.rel) }}" class="mono">{{ r.id }}</a>
+      {{ r.hypothesis }}
+      {% if r.verdict_scope %}<span class="sub">holds under: {{ r.verdict_scope }}</span>{% endif %}
+      {% if r.invalidation_reason %}<span class="sub warn">{{ r.invalidation_reason }}</span>{% endif %}
+    </td>
+    <td><a href="{{ question_url(r.question_rel) }}">{{ r.question_title }}</a></td>
+    <td>
+      <span class="chip verdict-{{ r.verdict | replace('/', '-') }}">{{ r.verdict or r.status }}</span>
+      {% if r.verdict_state != 'current' %}<span class="chip warn">{{ r.verdict_state }}</span>{% endif %}
+    </td>
+    <td class="num">{% if r.metric %}{{ r.metric.value | num }}{% else %}—{% endif %}</td>
+    <td class="num">
+      {% if r.metric and r.metric.delta is not none %}
+      <span class="{{ 'up' if r.metric.delta >= 0 else 'down' }}">{{ r.metric.delta | delta }}</span>
+      {% else %}—{% endif %}
+    </td>
+    <td class="mono">{{ r.run_date or '—' }}</td>
+    <td>{{ r.owner or '—' }}</td>
+  </tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+<p class="note">An invalidated or superseded hypothesis stays listed, struck through, with its
+reason. That it was tried is permanent knowledge even when the number is not.</p>
+{% else %}
+<p class="empty">No hypotheses recorded yet. A baseline carries none by design; an experiment
+of kind <span class="mono">hypothesis_test</span>, <span class="mono">ablation</span> or
+<span class="mono">sweep</span> must.</p>
+{% endif %}
+
+{% endblock %}

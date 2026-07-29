@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+{% block title %}Overview{% endblock %}
+{% block content %}
+
+<section class="hero">
+  <p class="lede">{{ research.description }}</p>
+  {% if research.headline %}
+  <div class="headline">
+    <div class="metric-big">
+      <span class="label">{{ research.headline.metric }}</span>
+      <span class="value">{{ research.headline.value | num }}</span>
+      {% if research.headline.target is not none %}
+      <span class="target">target {{ research.headline.target | num }}</span>
+      {% endif %}
+    </div>
+    <a class="muted" href="{{ question_url(research.headline.question_rel) }}">best result &rarr;</a>
+  </div>
+  {% endif %}
+</section>
+
+<section>
+  <div class="section-head">
+    <h2>Questions</h2>
+    <input class="filter" data-filter-target="#questions" type="search" placeholder="Filter questions" aria-label="Filter questions">
+  </div>
+  {% if questions %}
+  <div class="scroll">
+  <table class="data" id="questions">
+    <thead>
+      <tr>
+        <th>Question</th><th>Status</th><th>Metric</th>
+        <th class="num">Hyp.</th><th class="num">Inval.</th>
+        <th class="num">Best</th><th class="num">Delta</th>
+        <th>Owner</th><th>Last activity</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for q in questions %}
+      <tr>
+        <td style="--depth: {{ q.depth }}">
+          <a class="indent" href="{{ question_url(q.rel) }}">{{ q.title }}</a>
+          <span class="sub">{{ q.description }}</span>
+        </td>
+        <td><span class="chip status-{{ q.status }}">{{ q.status }}</span></td>
+        <td class="mono">{{ q.primary_metric or '—' }}</td>
+        <td class="num">{{ q.hypotheses_tested }}</td>
+        <td class="num">{% if q.invalidated_count %}<span class="warn">{{ q.invalidated_count }}</span>{% else %}0{% endif %}</td>
+        <td class="num">{% if q.best %}{{ q.best.metric.value | num }}{% else %}—{% endif %}</td>
+        <td class="num">
+          {% if q.best and q.best.metric.delta is not none %}
+            <span class="{{ 'up' if q.best.metric.delta >= 0 else 'down' }}">{{ q.best.metric.delta | delta }}</span>
+          {% elif q.reference and q.reference.kind == 'target' %}
+            <span class="muted">vs target</span>
+          {% else %}—{% endif %}
+        </td>
+        <td>{{ q.owner or '—' }}</td>
+        <td class="mono">{{ q.last_activity or '—' }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  </div>
+  {% else %}
+  <p class="empty">No questions yet. A repo with no question has nothing to research.</p>
+  {% endif %}
+</section>
+
+<section class="cols">
+  <div>
+    <h2>Datasets</h2>
+    {% if datasets %}
+    <ul class="plain">
+      {% for d in datasets %}
+      <li>
+        <a href="{{ dataset_url(d.rel) }}">{{ d.title }}</a>
+        <span class="chip status-{{ d.status }}">{{ d.status }}</span>
+        <span class="mono sub">{{ d.version }} · {{ d.storage }}{% if d.generated %} · generated{% endif %}</span>
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p class="empty">None referenced yet.</p>
+    {% endif %}
+  </div>
+  <div>
+    <h2>Findings</h2>
+    {% if findings %}
+    <ul class="plain">
+      {% for f in findings %}
+      <li>
+        <a href="{{ finding_url(f.rel) }}">{{ f.title }}</a>
+        <span class="chip sev-{{ f.severity }}">{{ f.severity }}</span>
+        <span class="chip status-{{ f.status }}">{{ f.status }}</span>
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p class="empty">Nothing recorded yet.</p>
+    {% endif %}
+  </div>
+</section>
+
+{% if research_body %}
+<section class="prose">{{ research_body }}</section>
+{% endif %}
+
+{% if log %}
+<section>
+  <h2>Activity log</h2>
+  <details><summary>log.md</summary><div class="prose">{{ log }}</div></details>
+</section>
+{% endif %}
+
+{% endblock %}

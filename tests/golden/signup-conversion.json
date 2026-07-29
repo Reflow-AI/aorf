@@ -1,0 +1,194 @@
+{
+  "aorf_version": "0.1",
+  "datasets": [
+    {
+      "body": "\n# Provenance\nExported from the product analytics warehouse on 2026-07-01. Source of truth, committed via git LFS.\n\n# Format\nCSV, 12 columns, one row per signup.\n\n# Known issues\nMobile app signups before 2026-05-12 have a null `activation_at`.\n",
+      "checksum": "sha256:3f9a1c0e8b7d2a5c41e6f80b9d3c7a2e5b8f1d40c9a6e3b7f2d5a8c1e4b7f0d39",
+      "created": "2026-07-01",
+      "defect": "",
+      "description": "One row per trial signup with funnel step timestamps.",
+      "generated": false,
+      "generator": "",
+      "rel": "datasets/signups-2026q2.md",
+      "resource": "./signups-2026q2.csv",
+      "row_count": 18432,
+      "status": "stable",
+      "storage": "git-lfs",
+      "superseded_by": "",
+      "supersedes": "",
+      "title": "Q2 2026 signups",
+      "version": "v1"
+    }
+  ],
+  "findings": [],
+  "ledger": [
+    {
+      "hypothesis": "Removing the credit card requirement at signup raises trial-to-paid conversion by at least 4 percentage points.",
+      "id": "001-remove-cc-requirement",
+      "invalidation_reason": "",
+      "kind": "hypothesis_test",
+      "metric": {
+        "baseline_value": 0.28,
+        "ci": [
+          0.32,
+          0.36
+        ],
+        "delta": 0.06,
+        "direction": "higher_is_better",
+        "n": 4188.0,
+        "name": "conversion_rate",
+        "std": null,
+        "unit": "",
+        "value": 0.34
+      },
+      "owner": "akbay",
+      "question_rel": "questions/onboarding-friction/index.md",
+      "question_title": "Which onboarding step loses the most trial users?",
+      "rel": "questions/onboarding-friction/experiments/001-remove-cc-requirement/index.md",
+      "run_date": "2026-07-10",
+      "status": "done",
+      "tags": [],
+      "verdict": "supported",
+      "verdict_scope": "April to June 2026 cohorts, self-serve signups only",
+      "verdict_state": "current"
+    },
+    {
+      "hypothesis": "Cutting the signup form from 7 fields to 3 raises trial-to-paid conversion by at least 2 percentage points.",
+      "id": "002-shorter-signup-form",
+      "invalidation_reason": "",
+      "kind": "hypothesis_test",
+      "metric": {
+        "baseline_value": 0.28,
+        "ci": [
+          0.271,
+          0.299
+        ],
+        "delta": 0.004999999999999949,
+        "direction": "higher_is_better",
+        "n": 3902.0,
+        "name": "conversion_rate",
+        "std": null,
+        "unit": "",
+        "value": 0.285
+      },
+      "owner": "akbay",
+      "question_rel": "questions/onboarding-friction/index.md",
+      "question_title": "Which onboarding step loses the most trial users?",
+      "rel": "questions/onboarding-friction/experiments/002-shorter-signup-form/index.md",
+      "run_date": "2026-07-15",
+      "status": "done",
+      "tags": [],
+      "verdict": "refuted",
+      "verdict_scope": "April to June 2026 cohorts; form fields only, card step unchanged",
+      "verdict_state": "current"
+    },
+    {
+      "hypothesis": "Replacing the static welcome page with an interactive activation checklist raises trial-to-paid conversion by at least 3 percentage points.",
+      "id": "003-interactive-checklist",
+      "invalidation_reason": "",
+      "kind": "hypothesis_test",
+      "metric": {
+        "baseline_value": 0.28,
+        "ci": [
+          0.274,
+          0.326
+        ],
+        "delta": 0.019999999999999962,
+        "direction": "higher_is_better",
+        "n": 1120.0,
+        "name": "conversion_rate",
+        "std": null,
+        "unit": "",
+        "value": 0.3
+      },
+      "owner": "akbay",
+      "question_rel": "questions/onboarding-friction/index.md",
+      "question_title": "Which onboarding step loses the most trial users?",
+      "rel": "questions/onboarding-friction/experiments/003-interactive-checklist/index.md",
+      "run_date": "2026-07-22",
+      "status": "done",
+      "tags": [],
+      "verdict": "inconclusive",
+      "verdict_scope": "two week run, underpowered",
+      "verdict_state": "current"
+    }
+  ],
+  "log": "",
+  "questions": [
+    {
+      "answer": "",
+      "best": {
+        "id": "001-remove-cc-requirement",
+        "metric": {
+          "baseline_value": 0.28,
+          "ci": [
+            0.32,
+            0.36
+          ],
+          "delta": 0.06,
+          "direction": "higher_is_better",
+          "n": 4188.0,
+          "name": "conversion_rate",
+          "std": null,
+          "unit": "",
+          "value": 0.34
+        },
+        "rel": "questions/onboarding-friction/experiments/001-remove-cc-requirement/index.md",
+        "title": "Remove the credit card requirement"
+      },
+      "children": [],
+      "closed_reason": "",
+      "depth": 1,
+      "description": "Locate the single highest drop-off step so we attack the dominant loss first.",
+      "experiment_count": 4,
+      "hypotheses_tested": 3,
+      "invalidated_count": 0,
+      "last_activity": "2026-07-22",
+      "metric_direction": "higher_is_better",
+      "metric_target": 0.35,
+      "owner": "akbay",
+      "primary_metric": "conversion_rate",
+      "prior_art": {
+        "conclusion": "partially_solved",
+        "cost_usd": 0,
+        "rel": "questions/onboarding-friction/prior-art.md",
+        "searched_on": "2026-07-02",
+        "valid_until": ""
+      },
+      "reference": {
+        "kind": "baseline",
+        "rel": "questions/onboarding-friction/experiments/000-baseline/index.md",
+        "value": 0.28
+      },
+      "rel": "questions/onboarding-friction/index.md",
+      "slug": "onboarding-friction",
+      "status": "active",
+      "synthesis": "questions/onboarding-friction/synthesis.md",
+      "tags": [
+        "funnel"
+      ],
+      "title": "Which onboarding step loses the most trial users?",
+      "tracker": ""
+    }
+  ],
+  "research": {
+    "body": "\n# Problem statement\n72% of trial signups never reach a paid plan. We do not know which step loses them.\n\n# Goal and success criteria\nRaise trial-to-paid conversion from 0.28 to 0.35 or better, measured on a full monthly cohort.\n\n# Scope and non-goals\nIn scope: the signup and onboarding flow. Out of scope: pricing, paid acquisition channels.\n\n# Questions\n- [Which onboarding step loses the most trial users?](questions/onboarding-friction/index.md) (active)\n\n# Datasets\n- [Q2 2026 signups](datasets/signups-2026q2.md)\n",
+    "declared_version": "0.1",
+    "description": "Find where trial users drop off before paying, and raise conversion.",
+    "headline": null,
+    "metric_direction": "",
+    "metric_target": null,
+    "primary_metric": "",
+    "rel": "index.md",
+    "status": "active",
+    "tag_vocabulary": [
+      "funnel",
+      "growth"
+    ],
+    "tags": [
+      "growth",
+      "funnel"
+    ],
+    "title": "Trial-to-paid conversion"
+  }
+}
