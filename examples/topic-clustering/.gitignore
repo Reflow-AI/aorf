@@ -1,0 +1,11 @@
+# Derived data is never committed. Regenerate with shared/build_tokens.py
+datasets/derived/
+**/artifacts/cache/
+*.tmp
+
+# Local environment
+.venv/
+__pycache__/
+
+# Note: the raw corpus is deliberately NOT ignored. It cannot be regenerated, so it is
+# tracked rather than rebuilt.

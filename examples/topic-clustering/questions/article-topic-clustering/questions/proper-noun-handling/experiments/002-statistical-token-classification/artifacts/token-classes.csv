@@ -1,0 +1,5 @@
+token_class,token_count,median_doc_freq,median_cluster_concentration,masked
+boilerplate,1840,0.412,0.03,yes
+incidental,14203,0.021,0.08,yes
+subject,3877,0.004,0.71,no
+unclassified,612,0.009,0.22,no

@@ -17,7 +17,7 @@ from aorf.model import load
 from aorf.project import project, to_json
 
 GOLDEN = Path(__file__).parent / "golden"
-EXAMPLE_NAMES = ["signup-conversion", "workflow-mining", "minimal-spike"]
+EXAMPLE_NAMES = ["signup-conversion", "topic-clustering", "minimal-spike"]
 
 
 def example_path(examples_dir: Path, name: str) -> Path:
@@ -78,28 +78,28 @@ def test_signup_conversion_shape(examples_dir: Path):
     assert len(data["ledger"]) == 3
 
 
-def test_workflow_mining_excludes_invalidated_from_best(examples_dir: Path):
-    """The invalidated entity-stripping result must not become the current best."""
-    data = project(load(example_path(examples_dir, "workflow-mining")))
+def test_topic_clustering_excludes_invalidated_from_best(examples_dir: Path):
+    """The invalidated proper-noun result must not become the current best."""
+    data = project(load(example_path(examples_dir, "topic-clustering")))
     by_slug = {q["slug"]: q for q in data["questions"]}
-    clustering = by_slug["semantic-event-clustering"]
+    clustering = by_slug["article-topic-clustering"]
     assert clustering["invalidated_count"] == 1
-    assert clustering["best"]["id"] == "001-group-vs-event-embeddings"
+    assert clustering["best"]["id"] == "001-document-vs-sentence-embeddings"
     # but it stays in the ledger, which is the whole point
     ledger_ids = {r["id"] for r in data["ledger"]}
-    assert "002-entity-stripping" in ledger_ids
-    invalidated = next(r for r in data["ledger"] if r["id"] == "002-entity-stripping")
+    assert "002-proper-noun-stripping" in ledger_ids
+    invalidated = next(r for r in data["ledger"] if r["id"] == "002-proper-noun-stripping")
     assert invalidated["verdict_state"] == "invalidated"
     assert invalidated["invalidation_reason"]
 
 
-def test_workflow_mining_partitions_by_comparability(examples_dir: Path):
+def test_topic_clustering_partitions_by_comparability(examples_dir: Path):
     """The v1 and v2 results must not share a table."""
     from aorf.project import comparability_groups
 
-    model = load(example_path(examples_dir, "workflow-mining"))
+    model = load(example_path(examples_dir, "topic-clustering"))
     question = next(
-        q for q in model.all_questions.values() if q.slug == "semantic-event-clustering"
+        q for q in model.all_questions.values() if q.slug == "article-topic-clustering"
     )
     groups = comparability_groups(model, question)
     assert len(groups) == 2
@@ -118,10 +118,10 @@ def test_minimal_spike_falls_back_to_target(examples_dir: Path):
 
 
 def test_answered_subquestion_carries_evidence(examples_dir: Path):
-    data = project(load(example_path(examples_dir, "workflow-mining")))
+    data = project(load(example_path(examples_dir, "topic-clustering")))
     answered = next(q for q in data["questions"] if q["status"] == "answered")
     assert answered["answer"]
-    assert answered["best"]["id"] == "002-statistical-container-detection"
+    assert answered["best"]["id"] == "002-statistical-token-classification"
 
 
 def test_every_example_renders_every_page(examples_dir: Path):

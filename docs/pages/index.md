@@ -1,37 +1,17 @@
-# Your research repo forgets what you learned. This fixes that.
+# AORF, the Open Research Format
 
-After a few weeks nobody can answer "what did we already try, and what was the result" — not
-your teammates, not your agent, not you. The experiments happened; the knowledge they produced
-is not recoverable from what they left behind.
+AORF is a convention for laying out a research repository so that the reasoning in it is
+machine-readable: not only what was run, but what was expected, what the result was, and what
+remains open.
 
-AORF records the scientific layer instead of the mechanical one: **the hypothesis, the verdict,
-and what is still open.** It is plain markdown with YAML frontmatter, so it lives in your repo
-and diffs in your PRs. A coding agent that opens the repo can state the goal, the open
-questions and every hypothesis already tested without being told anything.
+Documents are markdown with YAML frontmatter. There is no database and no service. The format is a
+profile of Google Cloud's [Open Knowledge Format](./okf.html), so every AORF document is also a
+valid OKF document.
 
-<div class="cta">
-  <p class="cta-lede">Give your agent this URL and answer four questions:</p>
-  <p class="cta-url"><code>https://reflow-ai.github.io/aorf/v0.1/aorf_scaffolding.md</code></p>
-  <p class="cta-sub">Nothing to install. Or: <code>pip install aorf &amp;&amp; aorf init</code></p>
-</div>
+## What it records
 
-## What it looks like
-
-This is not a mockup. It is the real `aorf build` output over
-[an example repository](./demo.html), published by CI on every commit.
-
-<div class="frame-wrap">
-  <iframe src="./demo/signup-conversion/index.html" title="AORF dashboard, live example"
-          loading="lazy"></iframe>
-</div>
-
-<p class="frame-caption"><a href="./demo/signup-conversion/index.html">Open the full dashboard
-&rarr;</a></p>
-
-## The one thing no other tool records
-
-Every experiment tracker records runs, params, metrics and artifacts. None of them records a
-hypothesis or a verdict.
+An experiment tracker records runs: parameters, metrics, artifacts, timings. AORF records the layer
+above that — the claim being tested and what happened to it.
 
 ```yaml
 kind: hypothesis_test
@@ -49,32 +29,63 @@ metrics:
     primary: true
 ```
 
-From that, and nothing else, a reader gets the claim, the outcome, the conditions the outcome
-holds under, and a number that means something because there is a reference to compare it to.
-The [hypothesis ledger](./demo/signup-conversion/ledger.html) is every one of those in a repo on
-one page — including the refuted ones, and the ones whose numbers later stopped counting.
+Four things are readable from that without opening the body: the claim, the outcome, the conditions
+the outcome is asserted under, and a measurement with a reference to compare it against.
 
-## Three things, one repository
+## Repository layout
 
-**The spec.** An `AGENTS.md` that travels inside each research repo and makes it
-self-describing. Drop it in and an agent knows how to read and extend the repo — including how
-to derive the same rollups the dashboard shows.
+```
+/
+├── AGENTS.md                    the format's rules, so the repo is self-describing
+├── index.md                     type: research
+├── datasets/<name>.md           type: dataset
+├── findings/<slug>.md           type: finding
+├── shared/                      payload: code used by more than one experiment
+└── questions/<slug>/
+    ├── index.md                 type: question
+    ├── prior-art.md             type: prior-art, optional
+    ├── synthesis.md             type: synthesis, generated
+    └── experiments/<NNN-slug>/
+        ├── index.md             type: experiment
+        ├── runs.jsonl           required when kind: sweep
+        ├── src/                 payload
+        └── artifacts/           payload: all outputs go here
+```
 
-**The format.** [AORF v0.1](./spec.html), a profile of Google Cloud's
-[Open Knowledge Format](./okf.html). Every AORF document is a valid OKF document.
+Three documents are required to start: the root `index.md`, one question, one experiment. The rest
+appear when there is something to put in them — `synthesis.md` at three experiments, `prior-art.md`
+when a search has been run, `datasets/` when an experiment references data.
 
-**The package.** `pip install aorf` gives you `aorf check` (26 integrity rules), `aorf show
---json` (your repo's rollups as data, for an agent in a terminal), `aorf serve` (a local
-dashboard) and `aorf build` (a static export you can publish).
+## The tooling
 
-## Why the checker matters more than the dashboard
+`pip install aorf` provides four commands. None of them is required to use the format.
 
-Asking a human or an agent to update four denormalized rollups at the end of every experiment is
-asking them to maintain a database by hand. It fails silently: a drifted repo is byte-identical
-to a maintained one.
+| Command | What it does |
+|---|---|
+| `aorf check` | validates the repository against 26 integrity rules; exits 1 on error |
+| `aorf show --json` | prints the repository's derived rollups as data |
+| `aorf serve` | a read-only local dashboard |
+| `aorf build` | a static export |
 
-At 80% compliance the convention is **worse than nothing** — a confidently read stale rollup
-beats you, where an absent one sends you to look at the experiments. So exactly one thing is
-hand-written, experiment frontmatter, and everything else is derived and checked.
+`aorf check` is the part that carries weight. The format's central constraint is that experiment
+frontmatter is the only hand-written source of truth and every summary is derived from it. That
+constraint is only worth anything if something enforces it, because a repository whose summaries
+have drifted is byte-for-byte indistinguishable from one that is current.
 
-[Read the argument in full &rarr;](./why.html)
+## Where to start
+
+- [Rationale](./rationale.html) — why the format records what it records
+- [Quickstart](./quickstart.html) — setting up a repository, with or without the package
+- [Specification](./spec.html) — AORF v0.1 in full, plus the JSON Schema
+- [Examples](./examples.html) — three repositories, rendered by `aorf build`
+- [Relation to OKF](./okf.html) — what AORF inherits, and the one place it diverges
+
+To set up a repository without installing anything, an agent can be given the scaffolding
+document directly:
+
+```
+https://reflow-ai.github.io/aorf/v0.1/aorf_scaffolding.md
+```
+
+It contains the format's rules and an interview to fill in the first three documents. The
+equivalent with the package installed is `aorf init`.

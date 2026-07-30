@@ -1,12 +1,12 @@
 # Quickstart
 
-## The short way: hand your agent a URL
+## Without installing anything
 
 ```
 https://reflow-ai.github.io/aorf/v0.1/aorf_scaffolding.md
 ```
 
-Paste that into your coding agent, in the repository you want to use. Nothing to install.
+Give that URL to a coding agent working in the repository you want to set up.
 
 The agent fetches a versioned, immutable instruction document, asks you four questions — what
 you are trying to find out, what "done" looks like, the first question you need to answer, and
@@ -39,10 +39,10 @@ Python 3.10+. Three runtime dependencies — `pyyaml`, `markdown-it-py`, `jinja2
 stdlib, and every chart is server-generated inline SVG, so there is no JavaScript charting
 dependency and nothing is ever fetched from a CDN.
 
-## Wire the checker into CI
+## Running the checker in CI
 
-The checker matters more than the dashboard: a dashboard that renders a repo which quietly lies
-is worse than no dashboard.
+A repository whose derived summaries have drifted looks identical to one that is current, so the
+check is worth running automatically rather than on request.
 
 ```yaml
 - run: pip install aorf
@@ -103,7 +103,7 @@ metrics:
     n: 4188
     ci: [0.32, 0.36]
 run_date: 2026-07-10
-owner: akbay
+owner: jordan
 tracker: GROW-118
 ---
 ```
@@ -112,7 +112,7 @@ Then the body: `# Hypothesis`, `# Method`, `# Results`, `# Conclusion`, `# Next`
 in `artifacts/` next to the document — CSVs, images, HTML reports, a `runs.jsonl` for a sweep.
 The dashboard renders each by type without you listing them anywhere.
 
-## Two rules worth knowing up front
+## Two constraints to be aware of
 
 **The hypothesis is written before the run and never edited after.** If the result suggests a
 different claim, that is a new experiment with `retests` pointing at the old one. `aorf check`
@@ -122,4 +122,4 @@ hypothesis.
 **Record `refuted` and `inconclusive` as readily as `supported`.** A negative result recorded
 once is what stops it being paid for twice, and it is exactly what every other tool throws away.
 
-[The full specification &rarr;](./spec.html)
+See the [specification](./spec.html) for the complete field tables and the 26 integrity rules.
