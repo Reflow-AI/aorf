@@ -41,7 +41,7 @@
         "unit": "",
         "value": 0.34
       },
-      "owner": "akbay",
+      "owner": "jordan",
       "question_rel": "questions/onboarding-friction/index.md",
       "question_title": "Which onboarding step loses the most trial users?",
       "rel": "questions/onboarding-friction/experiments/001-remove-cc-requirement/index.md",
@@ -71,7 +71,7 @@
         "unit": "",
         "value": 0.285
       },
-      "owner": "akbay",
+      "owner": "jordan",
       "question_rel": "questions/onboarding-friction/index.md",
       "question_title": "Which onboarding step loses the most trial users?",
       "rel": "questions/onboarding-friction/experiments/002-shorter-signup-form/index.md",
@@ -101,7 +101,7 @@
         "unit": "",
         "value": 0.3
       },
-      "owner": "akbay",
+      "owner": "jordan",
       "question_rel": "questions/onboarding-friction/index.md",
       "question_title": "Which onboarding step loses the most trial users?",
       "rel": "questions/onboarding-friction/experiments/003-interactive-checklist/index.md",
@@ -146,7 +146,7 @@
       "last_activity": "2026-07-22",
       "metric_direction": "higher_is_better",
       "metric_target": 0.35,
-      "owner": "akbay",
+      "owner": "jordan",
       "primary_metric": "conversion_rate",
       "prior_art": {
         "conclusion": "partially_solved",

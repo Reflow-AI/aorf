@@ -21,7 +21,7 @@ metrics:
     n: 4188
     ci: [0.32, 0.36]
 run_date: 2026-07-10
-owner: akbay
+owner: jordan
 tracker: GROW-118
 timestamp: 2026-07-10
 ---

@@ -1,0 +1,6 @@
+run_id,embedding_model,threshold,granularity,ari,cluster_leakage
+r002,all-MiniLM-L6-v2,0.7,document,0.53,0.167
+r014,e5-large-v2,0.75,document,0.59,0.152
+r028,gte-large,0.85,document,0.7,0.125
+r038,bge-large-en-v1.5,0.85,document,0.71,0.122
+r040,bge-large-en-v1.5,0.9,document,0.66,0.135

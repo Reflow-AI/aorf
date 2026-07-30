@@ -5,7 +5,7 @@ see what you tried and what happened. A profile of Google's Open Knowledge Forma
 
 **[Website](https://reflow-ai.github.io/aorf/)** ·
 **[Specification](https://reflow-ai.github.io/aorf/spec.html)** ·
-**[Live example](https://reflow-ai.github.io/aorf/demo.html)**
+**[Examples](https://reflow-ai.github.io/aorf/examples.html)**
 
 ---
 

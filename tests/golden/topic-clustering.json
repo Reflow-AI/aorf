@@ -1,0 +1,356 @@
+{
+  "aorf_version": "0.1",
+  "datasets": [
+    {
+      "body": "\n# Provenance\n\nPublic news corpus, articles published January 2024 to June 2026, collected once and never\nmodified. Committed via git LFS so the repository has no external dependency.\n\n# Format\n\nJSONL, one object per article: `id`, `published_at`, `headline`, `body`, `source`.\n\n# Known issues\n\nRoughly 3% of articles have an empty body and only a headline. Wire-service copy appears more\nthan once under different ids, which is genuine duplication in the source rather than an ingest\ndefect.\n",
+      "checksum": "sha256:8c1e4b7f0d39a6e3b7f2d5a8c1e4b7f0d3f9a1c0e8b7d2a5c41e6f80b9d3c7a2",
+      "created": "2026-07-01",
+      "defect": "",
+      "description": "Unmodified article text and publication dates, the source of truth for this research.",
+      "generated": false,
+      "generator": "",
+      "rel": "datasets/articles-raw.md",
+      "resource": "./raw/articles-2026-06.jsonl",
+      "row_count": 184203,
+      "status": "stable",
+      "storage": "git-lfs",
+      "superseded_by": "",
+      "supersedes": "",
+      "title": "News article corpus",
+      "version": "2026-06"
+    },
+    {
+      "body": "\n# Provenance\n\nGenerated from the [news article corpus](articles-raw.md) by `shared/build_tokens.py` at commit\n`a1b2c3d`. Derived, so not committed; gitignored under `datasets/derived/`.\n\n# Format\n\nJSONL, one object per article: `id`, `tokens`, `published_at`.\n\n# Changelog\n\n- 2026-07-02 created\n- 2026-07-20 withdrawn, see [finding](../findings/tokens-v1-duplicate-rows.md)\n\n# Known issues\n\n12% duplicate rows. No result computed on this version is comparable to v2, and results that\nused it have been marked invalidated rather than deleted.\n",
+      "checksum": "sha256:d5a8c1e4b7f0d39a6e3b7f2c41e6f80b9d3c7a2e5b8f1d40c9a6e3b7f2d5a8c1",
+      "created": "2026-07-02",
+      "defect": "the paragraph splitter emitted each article twice, so 12% of rows are duplicates and every cluster size is inflated",
+      "description": "First tokenisation pass over the article corpus. Withdrawn, contained duplicate rows.",
+      "generated": true,
+      "generator": "/shared/build_tokens.py",
+      "rel": "datasets/tokens-v1.md",
+      "resource": "./derived/tokens-v1.jsonl",
+      "row_count": 54120,
+      "status": "deprecated",
+      "storage": "none",
+      "superseded_by": "./tokens-v2.md",
+      "supersedes": "",
+      "title": "Tokenised articles v1",
+      "version": "v1"
+    },
+    {
+      "body": "\n# Provenance\n\nGenerated from the [news article corpus](articles-raw.md) by `shared/build_tokens.py` at commit\n`d4e5f6a`, which fixed the double-emit in the paragraph splitter. Derived and not committed;\nregenerate with:\n\n```\npython shared/build_tokens.py --out datasets/derived/tokens-v2.jsonl\n```\n\n# Format\n\nJSONL, one object per article: `id`, `tokens`, `published_at`.\n\n# Changelog\n\n- 2026-07-21 created, supersedes v1\n\n# Known issues\n\nNone known.\n",
+      "checksum": "sha256:0c9a6e3b7f2d5a8c1e4b7f0d39a6e3b7f2d5a8c1e4b7f0d3f9a1c0e8b7d2a5c4",
+      "created": "2026-07-21",
+      "defect": "",
+      "description": "Tokenised article text with the duplicate-row defect fixed.",
+      "generated": true,
+      "generator": "/shared/build_tokens.py",
+      "rel": "datasets/tokens-v2.md",
+      "resource": "./derived/tokens-v2.jsonl",
+      "row_count": 47633,
+      "status": "stable",
+      "storage": "none",
+      "superseded_by": "",
+      "supersedes": "./tokens-v1.md",
+      "title": "Tokenised articles v2",
+      "version": "v2"
+    }
+  ],
+  "findings": [
+    {
+      "affects": [
+        "/datasets/tokens-v1.md",
+        "/questions/article-topic-clustering/experiments/002-proper-noun-stripping/index.md"
+      ],
+      "body": "\n# What happened\n\nCluster sizes looked implausibly uniform. Counting distinct article ids showed 12% duplicates,\ntraced to the paragraph splitter in `build_tokens.py` emitting each article once per paragraph\nbatch instead of once per article.\n\n# Impact\n\nAny metric computed on tokens v1 is inflated, including the baseline it was compared against, so\nthe *delta* is wrong in both directions and cannot be corrected after the fact. Experiment 002\nunder article-topic-clustering is invalidated.\n\n# Resolution\n\n`build_tokens.py` now emits one row per article, verified by an id-uniqueness assertion.\nRegenerated as [tokens v2](../datasets/tokens-v2.md). The affected experiment is marked\n`verdict_state: invalidated` and kept, rather than deleted — that the approach was tried is worth\nknowing even though its numbers are not.\n",
+      "description": "A double-emit in the paragraph splitter inflated cluster sizes and invalidated results computed on v1.",
+      "discovered": "2026-07-20",
+      "rel": "findings/tokens-v1-duplicate-rows.md",
+      "scope": "repo",
+      "severity": "blocking",
+      "source": "noticed incidentally while eyeballing cluster sizes in experiment 002",
+      "status": "resolved",
+      "title": "tokens v1 had 12% duplicate rows"
+    }
+  ],
+  "ledger": [
+    {
+      "hypothesis": "Embedding a whole article, rather than embedding its sentences separately and pooling them, raises clustering ARI by at least 0.05.",
+      "id": "001-document-vs-sentence-embeddings",
+      "invalidation_reason": "",
+      "kind": "sweep",
+      "metric": {
+        "baseline_value": 0.58,
+        "ci": null,
+        "delta": 0.13,
+        "direction": "higher_is_better",
+        "n": 50.0,
+        "name": "ari",
+        "std": 0.04,
+        "unit": "",
+        "value": 0.71
+      },
+      "owner": "alex",
+      "question_rel": "questions/article-topic-clustering/index.md",
+      "question_title": "Can we cluster articles into coherent topics?",
+      "rel": "questions/article-topic-clustering/experiments/001-document-vs-sentence-embeddings/index.md",
+      "run_date": "2026-07-24",
+      "status": "done",
+      "tags": [],
+      "verdict": "supported",
+      "verdict_scope": "tokens v2, four embedding models, similarity thresholds 0.70 to 0.90; does not hold at threshold <= 0.75",
+      "verdict_state": "current"
+    },
+    {
+      "hypothesis": "Replacing person and organisation names with placeholders before embedding raises clustering ARI by at least 0.05.",
+      "id": "002-proper-noun-stripping",
+      "invalidation_reason": "ran on tokens v1, which had 12% duplicate rows inflating every cluster size",
+      "kind": "hypothesis_test",
+      "metric": {
+        "baseline_value": 0.54,
+        "ci": null,
+        "delta": 0.08999999999999997,
+        "direction": "higher_is_better",
+        "n": 50.0,
+        "name": "ari",
+        "std": null,
+        "unit": "",
+        "value": 0.63
+      },
+      "owner": "alex",
+      "question_rel": "questions/article-topic-clustering/index.md",
+      "question_title": "Can we cluster articles into coherent topics?",
+      "rel": "questions/article-topic-clustering/experiments/002-proper-noun-stripping/index.md",
+      "run_date": "2026-07-18",
+      "status": "done",
+      "tags": [],
+      "verdict": "refuted",
+      "verdict_scope": "tokens v1 only; the result is not trustworthy because that dataset was withdrawn",
+      "verdict_state": "invalidated"
+    },
+    {
+      "hypothesis": "Masking the person and organisation spans found by an off-the-shelf NER model raises ARI by at least 0.05 over no masking.",
+      "id": "001-ner-masking",
+      "invalidation_reason": "",
+      "kind": "hypothesis_test",
+      "metric": {
+        "baseline_value": 0.71,
+        "ci": null,
+        "delta": 0.010000000000000009,
+        "direction": "higher_is_better",
+        "n": 50.0,
+        "name": "ari",
+        "std": null,
+        "unit": "",
+        "value": 0.72
+      },
+      "owner": "alex",
+      "question_rel": "questions/article-topic-clustering/questions/proper-noun-handling/index.md",
+      "question_title": "How do we stop proper nouns from splitting the same topic?",
+      "rel": "questions/article-topic-clustering/questions/proper-noun-handling/experiments/001-ner-masking/index.md",
+      "run_date": "2026-07-24",
+      "status": "done",
+      "tags": [],
+      "verdict": "refuted",
+      "verdict_scope": "tokens v2, spaCy en_core_web_trf, PERSON and ORG spans only",
+      "verdict_state": "current"
+    },
+    {
+      "hypothesis": "Classifying capitalised tokens by their cross-article distribution into subject, incidental and boilerplate, and masking only the incidental ones, raises ARI by at least 0.05 over no masking.",
+      "id": "002-statistical-token-classification",
+      "invalidation_reason": "",
+      "kind": "hypothesis_test",
+      "metric": {
+        "baseline_value": 0.71,
+        "ci": [
+          0.75,
+          0.83
+        ],
+        "delta": 0.08000000000000007,
+        "direction": "higher_is_better",
+        "n": 50.0,
+        "name": "ari",
+        "std": null,
+        "unit": "",
+        "value": 0.79
+      },
+      "owner": "alex",
+      "question_rel": "questions/article-topic-clustering/questions/proper-noun-handling/index.md",
+      "question_title": "How do we stop proper nouns from splitting the same topic?",
+      "rel": "questions/article-topic-clustering/questions/proper-noun-handling/experiments/002-statistical-token-classification/index.md",
+      "run_date": "2026-07-25",
+      "status": "done",
+      "tags": [],
+      "verdict": "supported",
+      "verdict_scope": "tokens v2, 184k articles, January 2024 to June 2026; thresholds fitted on a held-out month",
+      "verdict_state": "current"
+    }
+  ],
+  "log": "",
+  "questions": [
+    {
+      "answer": "",
+      "best": {
+        "id": "001-document-vs-sentence-embeddings",
+        "metric": {
+          "baseline_value": 0.58,
+          "ci": null,
+          "delta": 0.13,
+          "direction": "higher_is_better",
+          "n": 50.0,
+          "name": "ari",
+          "std": 0.04,
+          "unit": "",
+          "value": 0.71
+        },
+        "rel": "questions/article-topic-clustering/experiments/001-document-vs-sentence-embeddings/index.md",
+        "title": "Document-level vs sentence-level embeddings"
+      },
+      "children": [
+        "questions/article-topic-clustering/questions/proper-noun-handling/index.md"
+      ],
+      "closed_reason": "",
+      "depth": 1,
+      "description": "Group articles so that each cluster corresponds to what an editor would call one topic.",
+      "experiment_count": 3,
+      "hypotheses_tested": 2,
+      "invalidated_count": 1,
+      "last_activity": "2026-07-24",
+      "metric_direction": "higher_is_better",
+      "metric_target": 0.85,
+      "owner": "alex",
+      "primary_metric": "ari",
+      "prior_art": {
+        "conclusion": "partially_solved",
+        "cost_usd": 12.4,
+        "rel": "questions/article-topic-clustering/prior-art.md",
+        "searched_on": "2026-07-05",
+        "valid_until": "2027-07-05"
+      },
+      "reference": {
+        "kind": "baseline",
+        "rel": "questions/article-topic-clustering/experiments/000-baseline/index.md",
+        "value": 0.58
+      },
+      "rel": "questions/article-topic-clustering/index.md",
+      "slug": "article-topic-clustering",
+      "status": "active",
+      "synthesis": "questions/article-topic-clustering/synthesis.md",
+      "tags": [
+        "clustering",
+        "embeddings"
+      ],
+      "title": "Can we cluster articles into coherent topics?",
+      "tracker": ""
+    },
+    {
+      "answer": "Classify capitalised tokens statistically by how they distribute across articles, then mask only the incidental ones. ARI 0.79 against 0.71 for no masking.",
+      "best": {
+        "id": "002-statistical-token-classification",
+        "metric": {
+          "baseline_value": 0.71,
+          "ci": [
+            0.75,
+            0.83
+          ],
+          "delta": 0.08000000000000007,
+          "direction": "higher_is_better",
+          "n": 50.0,
+          "name": "ari",
+          "std": null,
+          "unit": "",
+          "value": 0.79
+        },
+        "rel": "questions/article-topic-clustering/questions/proper-noun-handling/experiments/002-statistical-token-classification/index.md",
+        "title": "Statistical token classification into subject, incidental and boilerplate"
+      },
+      "children": [],
+      "closed_reason": "",
+      "depth": 2,
+      "description": "Identify which names carry the subject and which are incidental, and mask only the incidental ones.",
+      "experiment_count": 3,
+      "hypotheses_tested": 2,
+      "invalidated_count": 0,
+      "last_activity": "2026-07-25",
+      "metric_direction": "higher_is_better",
+      "metric_target": null,
+      "owner": "alex",
+      "primary_metric": "ari",
+      "prior_art": null,
+      "reference": {
+        "kind": "baseline",
+        "rel": "questions/article-topic-clustering/questions/proper-noun-handling/experiments/000-baseline/index.md",
+        "value": 0.71
+      },
+      "rel": "questions/article-topic-clustering/questions/proper-noun-handling/index.md",
+      "slug": "proper-noun-handling",
+      "status": "answered",
+      "synthesis": "questions/article-topic-clustering/questions/proper-noun-handling/synthesis.md",
+      "tags": [
+        "entities",
+        "normalisation"
+      ],
+      "title": "How do we stop proper nouns from splitting the same topic?",
+      "tracker": ""
+    },
+    {
+      "answer": "",
+      "best": null,
+      "children": [],
+      "closed_reason": "",
+      "depth": 1,
+      "description": "Notice that the corpus has started covering different things, without re-labelling everything.",
+      "experiment_count": 1,
+      "hypotheses_tested": 0,
+      "invalidated_count": 0,
+      "last_activity": "2026-07-23",
+      "metric_direction": "higher_is_better",
+      "metric_target": null,
+      "owner": "sam",
+      "primary_metric": "drift_detection_f1",
+      "prior_art": {
+        "conclusion": "partially_solved",
+        "cost_usd": 8.1,
+        "rel": "questions/topic-drift-detection/prior-art.md",
+        "searched_on": "2026-07-26",
+        "valid_until": "2027-07-26"
+      },
+      "reference": null,
+      "rel": "questions/topic-drift-detection/index.md",
+      "slug": "topic-drift-detection",
+      "status": "literature_review",
+      "synthesis": "",
+      "tags": [
+        "drift",
+        "topics"
+      ],
+      "title": "Can we detect when the topic mix shifts over time?",
+      "tracker": ""
+    }
+  ],
+  "research": {
+    "body": "\n# Problem statement\n\nWe have a large corpus of news articles with no topic labels. Editors currently tag articles by\nhand, which does not scale and is inconsistent between people. We want to group articles into\ntopics automatically, closely enough that an editor would accept the grouping.\n\n# Goal and success criteria\n\nGiven the article corpus, produce clusters that correspond to what an editor would call a topic.\nSuccess: Adjusted Rand Index of at least 0.85 against a 50-article hand-labelled evaluation set.\n\n# Scope and non-goals\n\nIn scope: text representation, clustering method, handling of proper nouns, detecting when the\ntopic mix shifts. Out of scope: naming the clusters in human-readable form, serving the model,\nand the editorial interface.\n\n# Questions\n\n- [Can we cluster articles into coherent topics?](questions/article-topic-clustering/index.md) (active)\n- [Can we detect when the topic mix shifts over time?](questions/topic-drift-detection/index.md) (literature_review)\n\n# Datasets\n\n- [News article corpus](datasets/articles-raw.md) (source of truth)\n- [Tokenised articles v2](datasets/tokens-v2.md) (derived, current)\n- [Tokenised articles v1](datasets/tokens-v1.md) (derived, withdrawn)\n\n# Findings\n\n- [tokens v1 had duplicate rows](findings/tokens-v1-duplicate-rows.md) (blocking, resolved)\n",
+    "declared_version": "0.1",
+    "description": "Group news articles into coherent topics without labelled training data.",
+    "headline": null,
+    "metric_direction": "",
+    "metric_target": null,
+    "primary_metric": "",
+    "rel": "index.md",
+    "status": "active",
+    "tag_vocabulary": [
+      "clustering",
+      "drift",
+      "embeddings",
+      "entities",
+      "normalisation",
+      "topics"
+    ],
+    "tags": [
+      "topics",
+      "clustering",
+      "drift"
+    ],
+    "title": "Unsupervised topic clustering of a news corpus"
+  }
+}

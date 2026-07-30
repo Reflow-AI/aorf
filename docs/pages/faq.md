@@ -1,15 +1,14 @@
 # FAQ
 
-## Does this replace MLflow or Weights & Biases?
+## How does this relate to MLflow or Weights & Biases?
 
-No, and it does not overlap with them much. They record **runs**: params, metrics, artifacts,
-system stats. AORF records the layer above: **the hypothesis and the verdict.** Neither of those
-exists in any experiment tracker's data model.
+They operate at different levels and are meant to be used together. Those tools record runs:
+parameters, metrics, artifacts, system stats. AORF records the hypothesis and the verdict, neither
+of which exists in an experiment tracker's data model.
 
-They sit together. Put your run URL or ID in the experiment's `tracker` field, keep using the
-tracker for what it is good at, and let AORF hold the claim and its outcome. MLflow's artifact
-viewer is in fact the reference implementation for AORF's artifact dispatch — including the
-sandboxed-iframe treatment of user HTML.
+The connection is the `tracker` field on an experiment, which holds the run URL or ID. MLflow's
+artifact viewer is the reference implementation for AORF's artifact dispatch, including the
+sandboxed-iframe treatment of author-supplied HTML.
 
 ## Do I need the package?
 
@@ -17,8 +16,8 @@ No. The format is plain markdown and the reading and derivation rules are in the
 sits in the repo, so an agent can parse the frontmatter and compute the same overview a dashboard
 would, with nothing installed.
 
-What the package adds: `aorf check`, which is genuinely load-bearing. Not because parsing is hard
-but because *deriving* is easy to get subtly wrong — comparability grouping, direction-aware
+What the package adds is `aorf check`. Not because parsing is hard, but because deriving is easy to
+get subtly wrong — comparability grouping, direction-aware
 deltas, keeping invalidated results out of the headline but in the ledger. An agent doing that ad
 hoc gets it right most of the time, differently each session. At 80% right a rollup is worse than
 no rollup.
@@ -35,7 +34,7 @@ AORF owns **hypotheses and evidence**: what was claimed, what happened, what tha
 `tracker` field on a question links them — one issue per question, not per experiment, because an
 issue per experiment turns your tracker into a lab notebook and it is bad at that.
 
-## Why not just use a `RESULTS.md` file?
+## Why not a single `RESULTS.md` file?
 
 Because it drifts, and you cannot tell that it has. A stale hand-maintained summary is
 byte-identical to a current one, and the reading rules tell readers to trust it. That is the
@@ -70,8 +69,9 @@ pointing at it, and create a **new** dataset version with `supersedes`. You neve
 dataset document — a dataset referenced by a completed experiment is immutable, because the
 results are attached to the data they were computed on.
 
-The invalidated results stay in the hypothesis ledger, struck through, with the reason. They stop
-informing any current-best number. Both examples on the [demo page](./demo.html) show this.
+The invalidated results stay in the hypothesis ledger, struck through, with the reason, and stop
+informing any current-best number. The [topic-clustering example](./examples.html) shows the whole
+sequence: the finding, the superseded dataset, and the invalidated experiment.
 
 ## Can I nest questions arbitrarily deep?
 
@@ -91,11 +91,11 @@ access at runtime.
 
 Binding a non-loopback host requires an explicit flag and prints a warning.
 
-## What does "Agentic" in the name mean?
+## What does the acronym stand for?
 
-The acronym stands, and the gloss is just **Open Research Format** — "agent-first" belongs in a
-tagline, not a name. Anything called agentic in 2026 will read as dated in 2028, while the format
-should still be readable.
+Open Research Format. Earlier drafts expanded it as "Agentic Open Research Format"; the shorter
+gloss was chosen because a format should still read plainly once the current vocabulary has
+dated.
 
 ## What is not in v0.1?
 

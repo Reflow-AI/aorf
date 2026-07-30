@@ -73,4 +73,4 @@ The cost is duplication: the same contract sits in every AORF repo. The benefit 
 works with nothing installed and nothing configured, which is the property the whole thing is built
 around.
 
-[The specification &rarr;](./spec.html)
+The full field tables are in the [specification](./spec.html).

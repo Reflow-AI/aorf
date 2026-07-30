@@ -7,7 +7,7 @@ research_status: active
 primary_metric: conversion_rate
 metric_direction: higher_is_better
 metric_target: 0.35
-owner: akbay
+owner: jordan
 tags: [funnel]
 timestamp: 2026-07-26
 ---
