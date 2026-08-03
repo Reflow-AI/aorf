@@ -5,7 +5,7 @@ description: What is already established about card-up-front and form length in 
 question: ./index.md
 conclusion: partially_solved
 searched_on: 2026-07-02
-approved_by: akbay
+approved_by: jordan
 cost_usd: 0
 timestamp: 2026-07-02
 ---

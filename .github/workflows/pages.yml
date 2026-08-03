@@ -42,15 +42,26 @@ jobs:
       - name: Build the live demos with aorf build
         # Not a mockup: these pages are the actual tool's output over the example repos.
         run: |
-          for dir in examples/signup-conversion examples/workflow-mining examples/minimal-spike; do
+          for dir in examples/signup-conversion examples/topic-clustering examples/minimal-spike; do
             name="$(basename "$dir")"
             aorf build "$dir" --out "_site/demo/$name" --base "$BASE/demo/$name"
           done
 
-      - name: Fail if the demo the landing page embeds is missing
-        run: test -f _site/demo/signup-conversion/index.html
+      - name: Fail if any demo the Examples page links to is missing
+        run: |
+          for name in signup-conversion topic-clustering minimal-spike; do
+            test -f "_site/demo/$name/index.html" || {
+              echo "missing _site/demo/$name/index.html"; exit 1;
+            }
+          done
 
       - uses: actions/configure-pages@v5
+        with:
+          # Creates the Pages site and sets its source to this workflow on the first run, so
+          # the repository provisions its own Pages rather than needing a settings toggle
+          # someone has to remember. Harmless once it already exists.
+          enablement: true
+
       - uses: actions/upload-pages-artifact@v3
         with:
           path: _site

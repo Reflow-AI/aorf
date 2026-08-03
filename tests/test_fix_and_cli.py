@@ -240,8 +240,8 @@ def test_build_and_serve_agree_on_urls(examples_dir: Path, tmp_path: Path):
     from aorf.render.html import Renderer
 
     out = tmp_path / "site"
-    build_site(examples_dir / "workflow-mining", out)
-    renderer = Renderer(load(examples_dir / "workflow-mining"))
+    build_site(examples_dir / "topic-clustering", out)
+    renderer = Renderer(load(examples_dir / "topic-clustering"))
     for url_path in renderer.all_paths():
         assert (out / url_path.lstrip("/")).is_file(), f"{url_path} missing from the export"
         assert renderer.page_for(url_path) is not None

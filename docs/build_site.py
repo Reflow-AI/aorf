@@ -25,12 +25,12 @@ PAGES = HERE / "pages"
 
 # Order matters: it is the nav order and the reading order.
 NAV = [
-    ("index", "Home"),
-    ("why", "Why"),
+    ("index", "Overview"),
+    ("rationale", "Rationale"),
     ("quickstart", "Quickstart"),
-    ("spec", "Spec"),
+    ("spec", "Specification"),
     ("okf", "Relation to OKF"),
-    ("demo", "Live example"),
+    ("examples", "Examples"),
     ("faq", "FAQ"),
 ]
 
@@ -101,6 +101,11 @@ def render_page(path: Path, base: str, md: MarkdownIt) -> tuple[str, str]:
     if "{{SPEC}}" in text:
         spec_text = (REPO / "spec" / "AORF-v0.1.md").read_text(encoding="utf-8")
         spec_text = re.sub(r"^#\s+.+$", "", spec_text, count=1, flags=re.MULTILINE)
+        # The spec's own relative links are written for its home in `spec/`, where they are
+        # correct on GitHub. Inlining moves the text up one directory, so they need the prefix
+        # back or they 404 on the site — which is exactly the class of breakage the format's
+        # own link rules exist to prevent.
+        spec_text = re.sub(r"\]\(\./(?!spec/)", "](./spec/", spec_text)
         text = text.replace("{{SPEC}}", spec_text)
     title = first_heading(text)
     html = TEMPLATE.format(

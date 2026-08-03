@@ -21,7 +21,7 @@ metrics:
     n: 1120
     ci: [0.274, 0.326]
 run_date: 2026-07-22
-owner: akbay
+owner: jordan
 timestamp: 2026-07-22
 ---
 
