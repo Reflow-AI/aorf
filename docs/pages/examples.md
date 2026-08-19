@@ -11,8 +11,8 @@ CI.
 ## topic-clustering
 
 Unsupervised topic clustering of a news corpus. 19 documents, two levels of question nesting, a
-40-configuration sweep, a dataset superseded after a defect was found, and a result invalidated as a
-consequence.
+40-configuration sweep, a dataset superseded after a defect was found, a result invalidated as a
+consequence, and four notes — including the one that became a sub-question.
 
 <div class="cards">
   <a class="card" href="./demo/topic-clustering/index.html">
@@ -35,6 +35,11 @@ consequence.
     <span>Every hypothesis in the repository, including the invalidated one, struck through with its
     reason.</span>
   </a>
+  <a class="card" href="./demo/topic-clustering/notes.html">
+    <strong>Notes</strong>
+    <span>Four unstructured thoughts in their own section, grouped by status: two still open, one
+    promoted into the proper-noun sub-question, one dropped with its reason kept.</span>
+  </a>
 </div>
 
 Two things in this example are worth reading in the source rather than the dashboard. The
@@ -47,7 +52,8 @@ records a two-day attempt and the reason it was stopped.
 ## signup-conversion
 
 Trial-to-paid conversion for a SaaS product. 9 documents, flat structure, one question with a
-baseline and three experiments covering all three verdict values, and four artifact types.
+baseline and three experiments covering all three verdict values, four artifact types, and two
+notes in a `notes/` directory with no explainer — the shape is optional.
 
 <div class="cards">
   <a class="card" href="./demo/signup-conversion/index.html">
@@ -76,6 +82,10 @@ A two-day solo investigation. Three documents — the smallest valid repository 
 none`, showing what day one looks like and how the dashboard falls back to the question's
 `metric_target` when there is no baseline to compare against.
 
+It also carries a single note, which is the point: a note is not a document, so capturing a
+thought does not breach minimal mode. Without somewhere like this to put it, the thought becomes
+either an empty question or nothing at all.
+
 <div class="cards">
   <a class="card" href="./demo/minimal-spike/index.html">
     <strong>Overview</strong>
@@ -87,9 +97,14 @@ none`, showing what day one looks like and how the dashboard falls back to the q
     <span>With <code>baseline: none</code> there is no delta, so the question's target becomes the
     reference.</span>
   </a>
+  <a class="card" href="./demo/minimal-spike/notes.html">
+    <strong>One note</strong>
+    <span>A doubt about the sample, captured without being promoted into a question the spike does
+    not have time to answer.</span>
+  </a>
 </div>
 
-## Notes on the data
+## About the example data
 
 The example repositories contain no runnable pipeline and no real datasets. The dataset documents
 describe corpora that are not committed, since the point is to demonstrate the `storage`,
@@ -97,4 +112,6 @@ describe corpora that are not committed, since the point is to demonstrate the `
 generated so that the counts quoted in `verdict_basis` are true of the file.
 
 Every page here was produced by the same renderer `aorf serve` uses locally, over the same
-projection `aorf show --json` prints.
+projection `aorf show --json` prints. The notes are the one exception, and deliberately so: they
+are read separately and never enter that projection, because the format requires them to stay out
+of every rollup.

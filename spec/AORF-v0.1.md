@@ -509,6 +509,12 @@ Nothing derives from a note and nothing blocks on one. On review, a note is prom
 question, folded into an existing one, or dropped with its reason kept — **a rejected note is
 cheaper to keep than to re-derive**, so nothing here is deleted.
 
+A dashboard **MAY** present notes, and when it does they **MUST** appear in their own section,
+never mixed into the question, experiment or finding views. Showing them is display, not
+derivation: no count, delta or current-best may include a note. Placed among documents they
+would borrow a standing they do not have, which is the same confusion the `notes/` directory
+exists to prevent.
+
 Two details that matter, both from running this before standardising it:
 
 - **No maintained list of notes.** A hand-updated index inside `notes/index.md` goes stale and

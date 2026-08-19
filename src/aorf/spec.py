@@ -41,6 +41,9 @@ VERDICT_STATES = ("current", "invalidated", "superseded")
 DIRECTIONS = ("higher_is_better", "lower_is_better")
 DATASET_ROLES = ("eval", "train", "reference")
 STORAGE = ("git", "git-lfs", "none", "external")
+# `notes/` only. Recommended, never required and never validated — a note may carry no
+# frontmatter at all. Declared here so the dashboard can order the sections it groups by.
+NOTE_STATUS = ("open", "promoted", "dropped")
 PRIOR_ART_CONCLUSIONS = ("solved", "partially_solved", "open")
 FINDING_SCOPES = ("repo", "question")
 SEVERITIES = ("info", "important", "blocking")

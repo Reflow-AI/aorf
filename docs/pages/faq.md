@@ -103,6 +103,11 @@ no baseline and no hypothesis, which is exactly what minimal mode warns against.
 is promoted, folded into an existing question, or dropped with its reason kept. Nothing is
 deleted: a rejected note is cheaper to keep than to re-derive.
 
+`aorf serve` and `aorf build` give notes their own **Notes** section, grouped by status, and that
+tab only appears in repositories that have any. Showing them is display and not derivation — no
+count, delta or current-best anywhere in the dashboard includes a note. All three
+[examples](./examples.html) ship one.
+
 ## Is `aorf serve` safe to run?
 
 It is read-only and binds `127.0.0.1` by default. Every requested path is resolved and confirmed

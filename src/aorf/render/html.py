@@ -15,7 +15,7 @@ from jinja2 import Environment, FileSystemLoader, select_autoescape
 from markdown_it import MarkdownIt
 from markupsafe import Markup
 
-from .. import urls
+from .. import notes, spec, urls
 from ..model import Model
 from ..project import (
     blocking_findings,
@@ -101,6 +101,9 @@ class Renderer:
         self.model = model
         self.env = _environment()
         self.data = project(model)
+        # Read separately from `project`, which is the rollup projection notes are excluded
+        # from. The dashboard shows them; nothing derived is allowed to see them.
+        self.notes_data = notes.load(model.root)
         self._current = ""  # URL path being rendered, so nav can mark the current page
         self.blocking = blocking_findings(self.data)
         self.nav = [
@@ -110,6 +113,10 @@ class Renderer:
             ("Datasets", urls.page("datasets")),
             ("Findings", urls.page("findings")),
         ]
+        # Only when the repo actually has notes. An empty tab in every repo would be the
+        # dashboard asking for a directory the format says is optional.
+        if self.notes_data:
+            self.nav.append(("Notes", urls.page("notes")))
 
     # -- helpers ------------------------------------------------------------------------
     @property
@@ -231,6 +238,43 @@ class Renderer:
         for f in self.data["findings"]:
             f["affects_links"] = [self._doc_link(f["rel"], a) for a in f["affects"]]
         return self._render("findings.html", findings=self.data["findings"])
+
+    def _note_view(self, n) -> dict:
+        return {
+            "rel": n.rel,
+            "dir": n.dir,
+            "title": n.title,
+            "brief": n.brief,
+            "date": n.date,
+            "status": n.status,
+            "dropped_reason": n.dropped_reason,
+            "promoted_link": self._doc_link(n.rel, n.promoted_to) if n.promoted_to else None,
+            "body": self.prose(n.rel, n.body) if n.body else "",
+        }
+
+    def notes(self) -> str:
+        """Grouped by status, in lifecycle order, with anything unrecognised kept at the end.
+
+        An author's own status word is not dropped just because the format does not know it —
+        nothing here is validated, so nothing here may be silently discarded either.
+        """
+        known = list(spec.NOTE_STATUS)
+        order = {status: i for i, status in enumerate(known)}
+        for n in self.notes_data.items:
+            order.setdefault(n.status, len(order))
+        groups = []
+        for status in sorted({n.status for n in self.notes_data.items}, key=order.get):
+            items = [self._note_view(n) for n in self.notes_data.items if n.status == status]
+            groups.append({"status": status, "items": items})
+        return self._render(
+            "notes.html",
+            groups=groups,
+            intro=(
+                self.prose(self.notes_data.intro_rel, self.notes_data.intro)
+                if self.notes_data.intro
+                else ""
+            ),
+        )
 
     def question(self, slug: str) -> str | None:
         q = self._question_by_slug(slug)
@@ -380,6 +424,8 @@ class Renderer:
             "datasets": self.datasets,
             "findings": self.findings,
         }
+        if self.notes_data:
+            simple["notes"] = self.notes
         if name in simple:
             return simple[name]()
         for prefix, handler in (
@@ -396,6 +442,8 @@ class Renderer:
         """Every page the static export must write."""
         pages = ("ledger", "progress", "datasets", "findings")
         paths = ["/index.html"] + [urls.page(p) for p in pages]
+        if self.notes_data:
+            paths.append(urls.page("notes"))
         paths += [urls.question(q.rel) for q in self.model.all_questions.values()]
         paths += [urls.experiment(e.rel) for e in self.model.experiments]
         paths += [urls.dataset(d["rel"]) for d in self.data["datasets"]]
