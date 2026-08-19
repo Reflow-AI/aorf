@@ -47,7 +47,7 @@ class Document:
         """Question nesting depth: root is 0, `questions/<slug>/` is 1, one per nesting level.
 
         Counting `questions/` segments means an experiment reports its owning question's
-        depth, which is what the depth cap is actually about.
+        depth, which is the number the reader of a deep tree actually cares about.
         """
         return sum(1 for p in self.dir.split("/") if p == "questions")
 

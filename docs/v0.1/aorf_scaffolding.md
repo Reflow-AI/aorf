@@ -43,10 +43,11 @@ questions/<slug>/experiments/001-<slug>/index.md  type: experiment
 
 Plus `AGENTS.md`, `.gitignore` and `.gitattributes` (Step 4).
 
-Do **not** create `datasets/`, `findings/`, `synthesis.md`, `prior-art.md`, or nested
+Do **not** create `datasets/`, `findings/`, `synthesis.md`, `prior-art.md`, `notes/`, or nested
 `questions/` now. They appear when earned: `synthesis.md` at three experiments, `prior-art.md`
 when a search is actually run, `datasets/` when an experiment points at data, `findings/` when
-something is discovered.
+something is discovered, `notes/` the first time the user offers a thought without asking for it
+to be structured. Nesting has no depth limit; it appears when a question genuinely splits.
 
 **A scaffold that emits nine files of "TBD" is worse than an absent one**, because the reading
 rules then return confidently empty answers about a repo that looks populated.
@@ -144,11 +145,12 @@ meaningless while looking rigorous.
 guaranteed to be present in later sessions. Write it to cover, in this order:
 
 1. **Document discovery**: `index.md`, `synthesis.md`, `prior-art.md` anywhere, plus any `.md`
-   directly in `datasets/` or `findings/`. `artifacts/`, `src/` and `shared/` are payload
-   directories and are never validated as documents.
+   directly in `datasets/` or `findings/`. `artifacts/`, `src/`, `shared/` and `notes/` are
+   payload directories and are never validated as documents — including `notes/index.md`,
+   which is a plain explainer despite the name.
 2. **Link resolution**: a leading `/` is repo-root-relative; `parent` and `question` may be
    relative at any depth; every other link may climb at most one `..`, and anything deeper must
-   be root-relative.
+   be root-relative. This holds at every nesting depth, which is why nesting needs no cap.
 3. **The document types and their required fields**, compactly enough to write a valid document
    without fetching the spec.
 4. **Reading rules**: root `index.md`, then questions, then experiment frontmatter. Frontmatter
@@ -161,6 +163,9 @@ guaranteed to be present in later sessions. Write it to cover, in this order:
    only hand-written source of truth; all outputs in `artifacts/`; minimal mode.
 7. **The baseline behaviour** from Step 3: propose, do not impose.
 8. **The cost gate** below, verbatim in spirit.
+9. **The notes behaviour**: when the user offers a thought without asking for it to be
+   structured, write `notes/YYYY-MM-DD-slug.md` with `title` and `brief`. Do not create a
+   question or an experiment for it, and do not ask which one it should become.
 
 Do **not** copy these scaffolding instructions into `AGENTS.md`. They are needed once; they must
 not occupy context in every later session. Point at this URL for the not-yet-set-up case and

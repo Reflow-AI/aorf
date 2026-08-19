@@ -103,6 +103,7 @@ tag becomes a deliberate one-line decision rather than a typo.
 ├── findings/
 │   └── <slug>.md                # type: finding
 ├── shared/                      # payload: code used by more than one experiment
+├── notes/                       # payload: unstructured capture, optional (§11)
 └── questions/
     └── <slug>/
         ├── index.md             # type: question
@@ -114,8 +115,24 @@ tag becomes a deliberate one-line decision rather than a typo.
         │       ├── runs.jsonl   # required when kind: sweep
         │       ├── src/         # payload
         │       └── artifacts/   # payload: ALL outputs go here
-        └── questions/           # optional nesting, same shape
+        └── questions/           # optional nesting, same shape, no fixed depth limit
 ```
+
+**On nesting depth.** A question may contain `questions/` with the same shape, **to any depth**.
+Depth follows the structure of the research: nest when a question genuinely splits into
+sub-questions that need their own status and answer, not to create shape. Decomposition depth is
+a property of the research being described, not of the format describing it, so a numeric cap
+eventually contradicts the structure it exists to record. It also does not prevent deep
+structure — it relocates it into slugs like `plants-simulation-prediction`, which is hierarchy
+with none of the machinery: no `parent`, no rollup, no traversal.
+
+Validators **MUST NOT** reject a tree on account of its depth alone. They **MAY** emit an
+informational note past four levels, suggesting the author check the nodes are genuinely
+distinct questions. (R17)
+
+The constraint the cap was plausibly protecting — long, hand-written cross-tree paths — is
+addressed directly instead: any link climbing more than one `../` must be root-relative, at
+every depth. (§4, R25)
 
 ## 3. Document discovery (normative)
 
@@ -124,9 +141,14 @@ An AORF document is:
 - any file named `index.md`, `synthesis.md` or `prior-art.md`, **or**
 - any `.md` file directly inside `datasets/` or `findings/`.
 
-Reserved payload directories, **never** scanned as documents: `artifacts/`, `src/`, `shared/`.
-Everything inside them is content: free-form, any filename. `AGENTS.md`, `README.md` and
-`log.md` are not documents.
+Reserved payload directories, **never** scanned as documents: `artifacts/`, `src/`, `shared/`,
+`notes/`. Everything inside them is content: free-form, any filename. `AGENTS.md`, `README.md`
+and `log.md` are not documents.
+
+Because `notes/` is payload, **`notes/index.md` is explicitly exempt** from the rule that any
+file named `index.md` is a document. It is a plain explainer of the directory. Without the
+exemption, the natural way to describe a notes directory is discovered as a document and then
+fails R01 for having no `type` and no status field.
 
 This is why "all outputs go in `artifacts/`" is a spec rule and not a style preference: it is
 what makes document discovery decidable. Without it, an artifact write-up like `power.md` gets
@@ -391,7 +413,7 @@ set left open.
 | R14 | `generated: false` warns unless `storage` is `git` or `git-lfs` | warning |
 | R15 | `running` with a timestamp older than 30 days | warning |
 | R16 | Generated regions match what the generator would write now | warning, error under `--strict` |
-| R17 | Question nesting depth 3 warns; depth 4 errors under `--strict`. Root is depth 0, `questions/<slug>/` is 1 | warning / error |
+| R17 | Question nesting deeper than four levels is noted, never rejected — informational at every depth, `--strict` included. Root is depth 0, `questions/<slug>/` is 1 | info |
 | R18 | `hypothesis` must not change once `research_status` has left `planned`. Checked against git history; skipped with a note where git cannot answer | error |
 | R19 | Every `tags` value appears in the root `tag_vocabulary`. Repos using no tags skip this entirely | error |
 | R20 | `tag_vocabulary` entries are lowercase kebab-case and unique | error |
@@ -421,6 +443,10 @@ something is discovered, nesting when a question genuinely splits.
 A scaffold that emits nine files of "TBD" is worse than an absent one, because the reading
 rules then return confidently empty answers.
 
+"Create nothing before it is earned" needs somewhere for a thought to go before it has earned
+anything, or the thought is either over-structured into an empty question or lost. That is what
+`notes/` (§11) is for, and a note is not a document, so writing one does not breach this section.
+
 ## 9. Baseline policy (normative)
 
 A baseline is **strongly recommended, not required.** Its purpose is to give the iterations
@@ -446,8 +472,55 @@ without raising it again for that question.
 present. It must contain: document discovery (§3) and link resolution (§4) verbatim; the
 document types and their required fields; the reading rules; the derivation rules (§6); the
 writing rules including hypothesis-before-run and minimal mode; the baseline behaviour (§9);
-the cost gate (§5.5); and a pointer to the scaffolding document for a repo that is not yet set
-up. Scaffolding instructions themselves stay out of it — they must not occupy context in every
+the notes behaviour (§11); the cost gate (§5.5); and a pointer to the scaffolding document for
+a repo that is not yet set up. Scaffolding instructions themselves stay out of it — they must not occupy context in every
 later session.
 
 The reference template ships with the `aorf` package and is written by `aorf init`.
+
+---
+
+## 11. Notes (normative)
+
+Every other directory in this format holds something that has already been classified: a
+question, an experiment, a dataset, a finding, prior art, a synthesis. `notes/` is the one place
+for a thought that has **not** been classified yet.
+
+`notes/` is **optional**, and it is a payload directory (§3). One note per file, named
+`notes/YYYY-MM-DD-slug.md` so the directory listing sorts chronologically on its own. Notes are
+not documents. Validators **MUST NOT** validate their contents, **MUST NOT** require any
+frontmatter field on them, and **MUST** exclude them from every rollup.
+
+Recommended, not required, frontmatter:
+
+| Field | Meaning |
+|---|---|
+| `title` | A name, not a summary |
+| `brief` | The whole point in a sentence or two — enough to triage the note months later without opening it |
+| `date` | The day it was taken |
+| `status` | `open` while still just a note, `promoted` once it has become something in the research proper, `dropped` once considered and rejected |
+| `promoted_to` | Where it went, when `promoted` |
+| `dropped_reason` | Why, when `dropped` |
+
+Everything after the frontmatter is free-form. A note that is one sentence long is a complete
+note and should not be padded to look like more.
+
+Nothing derives from a note and nothing blocks on one. On review, a note is promoted into a
+question, folded into an existing one, or dropped with its reason kept — **a rejected note is
+cheaper to keep than to re-derive**, so nothing here is deleted.
+
+Two details that matter, both from running this before standardising it:
+
+- **No maintained list of notes.** A hand-updated index inside `notes/index.md` goes stale and
+  becomes the file nobody wants to maintain, which is the problem one-note-per-file exists to
+  avoid. The directory listing is the index; each note's `brief` is its summary.
+- **`notes/`, not `ideas/`.** Not everything captured is an idea. Some entries are plain
+  observations, or doubts about a decision already made. "Note" covers all of them, and it is
+  the word authors use when they ask for one.
+
+The behavioural half belongs in `AGENTS.md` (§10) and is what actually changes outcomes: when
+the user offers a thought without asking for it to be structured, write a note — do not create a
+question or an experiment for it, and do not ask which one it should become. The reason this is
+in the format rather than left to each repository is that the value only exists if it is
+universal: any agent arriving at any AORF repo already knows where an unclassified thought goes,
+and knows not to escalate it into a question.

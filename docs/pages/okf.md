@@ -55,9 +55,11 @@ depth-2 cross-tree path reached 142 characters containing `questions/` twice, tw
 paths written by hand were wrong, and a third was then broken by a mechanical rewrite.
 
 **Document discovery is closed.** Only `index.md`, `synthesis.md`, `prior-art.md`, and `.md` files
-directly inside `datasets/` or `findings/` are documents. `artifacts/`, `src/` and `shared/` are
-payload. Without this rule an artifact write-up gets validated as a document and fails, which is
-exactly what happened while building the examples.
+directly inside `datasets/` or `findings/` are documents. `artifacts/`, `src/`, `shared/` and
+`notes/` are payload. Without this rule an artifact write-up gets validated as a document and
+fails, which is exactly what happened while building the examples. `notes/index.md` is the one
+carve-out worth naming: it is a plain explainer of a payload directory, so despite the reserved
+filename it is not a document.
 
 ## The one departure, stated plainly
 

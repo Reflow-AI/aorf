@@ -75,10 +75,33 @@ sequence: the finding, the superseded dataset, and the invalidated experiment.
 
 ## Can I nest questions arbitrarily deep?
 
-You can nest two levels comfortably. Depth 3 warns and depth 4 fails under `--strict`, because
-cross-tree paths stop being writable by hand well before that. A sub-question's baseline inherits
-its parent's current best — its `000-baseline` re-runs the parent's winning configuration
-unchanged — which keeps metrics comparable up the tree.
+Yes. There is no depth limit, and depth alone never fails validation — past four levels
+`aorf check` prints an informational note suggesting you confirm the nodes are genuinely
+distinct questions, and that is all it does, `--strict` included.
+
+Decomposition depth belongs to the research, not to the format. A cap does not prevent deep
+structure anyway; it pushes it into slugs like `plants-simulation-prediction`, which is hierarchy
+with no `parent`, no rollup and no traversal — exactly where the tooling cannot see it. What a
+cap was plausibly protecting against is long cross-tree relative paths, and that is handled
+directly by R25 at every depth: anything climbing more than one `../` must be root-relative.
+
+Nest when a question genuinely splits into sub-questions that need their own status and answer,
+not to create shape. A sub-question's baseline inherits its parent's current best — its
+`000-baseline` re-runs the parent's winning configuration unchanged — which keeps metrics
+comparable up the tree.
+
+## Where do I put a thought that is not a question yet?
+
+`notes/`. One note per file, `notes/YYYY-MM-DD-slug.md`, with a `title` and a `brief` and
+whatever else the thought needs. Notes are payload: never validated, never rolled up, never
+counted, and nothing derives from one.
+
+It exists because every other directory holds something already classified, so without it an
+agent handed "this is just a note to check later" has no correct move — it either charges you a
+classification toll at the moment you least want to pay it, or invents a question with no metric,
+no baseline and no hypothesis, which is exactly what minimal mode warns against. On review a note
+is promoted, folded into an existing question, or dropped with its reason kept. Nothing is
+deleted: a rejected note is cheaper to keep than to re-derive.
 
 ## Is `aorf serve` safe to run?
 

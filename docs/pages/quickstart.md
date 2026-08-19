@@ -28,7 +28,7 @@ pip install aorf
 ```bash
 aorf init                # scaffold three documents, nothing more
 aorf check               # validate; exit 1 on error. This is the CI gate
-aorf check --strict      # also fail on stale generated regions and depth 4+
+aorf check --strict      # also fail on stale generated regions
 aorf check --fix         # refresh derived content, never hand-written prose
 aorf show --json         # your repo's rollups as data, for an agent in a terminal
 aorf serve               # read-only dashboard on 127.0.0.1:8471

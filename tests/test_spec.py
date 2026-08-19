@@ -103,7 +103,7 @@ def test_spec_markdown_lists_every_enum_value():
 
 
 def test_agents_template_covers_the_contract():
-    """The AGENTS.md template must carry all eight parts of the §10 contract."""
+    """The AGENTS.md template must carry all nine parts of the §10 contract."""
     from aorf.scaffold import ASSETS
 
     text = (ASSETS / "AGENTS.md").read_text(encoding="utf-8")
@@ -116,6 +116,7 @@ def test_agents_template_covers_the_contract():
         "before the run",  # 6 writing rules
         "propose",  # 7 baselines
         "get explicit approval",  # 8 cost gate
+        "do not ask which",  # 9 notes: capture without classifying
         "aorf_scaffolding.md",  # pointer for an unset-up repo
     ):
         assert needle in text, f"AGENTS.md template is missing: {needle!r}"

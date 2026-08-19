@@ -396,22 +396,36 @@ def _nest(root: Path, depth: int) -> None:
         write_doc(path / "index.md", question_fm(title=f"Level {level}"))
 
 
-def test_r17_depth_three_warns(tmp_path: Path):
-    """Depth 3 warns but stays a warning under --strict; only depth 4 escalates."""
-    _nest(tmp_path, 3)
-    assert_rule(tmp_path, "R17", level="warning")
-    assert not [i for i in issues_for(tmp_path, "R17", strict=True) if i.level == "error"]
-
-
-def test_r17_depth_four_errors_under_strict(tmp_path: Path):
+def test_r17_depth_four_is_silent(tmp_path: Path):
+    """Four levels is ordinary decomposition. The checker says nothing at all."""
     _nest(tmp_path, 4)
-    assert_rule(tmp_path, "R17", level="warning")
-    assert_rule(tmp_path, "R17", level="error", strict=True)
-
-
-def test_r17_depth_two_is_fine(tmp_path: Path):
-    _nest(tmp_path, 2)
     assert_no_rule(tmp_path, "R17", strict=True)
+
+
+def test_r17_depth_five_notes_without_complaining(tmp_path: Path):
+    """Past the threshold R17 is informational — it is not a warning either."""
+    _nest(tmp_path, 5)
+    assert_rule(tmp_path, "R17", level="info")
+    assert {i.level for i in issues_for(tmp_path, "R17")} == {"info"}
+
+
+def test_r17_never_errors_at_any_depth(tmp_path: Path):
+    """The point of the change: depth alone must never fail a repo, --strict included.
+
+    A tree this deep is exactly the case the old cap rejected, so if anything escalates it
+    the relaxation has not actually happened.
+    """
+    _nest(tmp_path, 8)
+    for strict in (False, True):
+        levels = {i.level for i in issues_for(tmp_path, "R17", strict=strict)}
+        assert levels == {"info"}, f"strict={strict} produced {sorted(levels)}"
+
+
+def test_r17_deep_tree_still_passes_the_whole_check(tmp_path: Path):
+    """Depth must not fail the repo through any rule, not just through R17."""
+    _nest(tmp_path, 8)
+    _, report = check_path(tmp_path, strict=True)
+    assert report.ok, [i.format() for i in report.errors]
 
 
 # --- R19, R20 tags -----------------------------------------------------------------------
@@ -616,6 +630,79 @@ def test_r26_three_experiments_want_a_synthesis(tmp_path: Path):
 
 def test_r26_quiet_below_the_threshold(valid_repo: Path):
     assert_no_rule(valid_repo, "R26")
+
+
+# --- notes/ is payload, not documents ----------------------------------------------------
+
+
+def _rels(root: Path) -> list[str]:
+    from aorf.parse import discover
+
+    return [d.rel for d in discover(root).docs]
+
+
+def _notes(root: Path) -> Path:
+    build_repo(root)
+    d = root / "notes"
+    d.mkdir()
+    return d
+
+
+def test_notes_index_is_not_a_document(tmp_path: Path):
+    """The carve-out that makes the whole directory usable.
+
+    `notes/index.md` is a plain explainer of the directory. Without the exemption it is
+    discovered by name, then fails R01 for having no `type` and no status field — which is
+    what any repo inventing a notes convention on its own hits today.
+    """
+    d = _notes(tmp_path)
+    (d / "index.md").write_text("# Notes\n\nLoose notes, one per file.\n", encoding="utf-8")
+    _, report = check_path(tmp_path, strict=True)
+    assert report.ok, [i.format() for i in report.errors]
+    assert "notes/index.md" not in _rels(tmp_path)
+
+
+def test_notes_have_no_required_frontmatter(tmp_path: Path):
+    """A note with no frontmatter at all is a complete note. Nothing may be demanded of it."""
+    d = _notes(tmp_path)
+    (d / "2026-08-19-a-thought.md").write_text("Just a thought.\n", encoding="utf-8")
+    (d / "2026-08-19-partial.md").write_text(
+        "---\ntitle: Partial\n---\n\nNo type, no status, on purpose.\n", encoding="utf-8"
+    )
+    _, report = check_path(tmp_path, strict=True)
+    assert report.ok, [i.format() for i in report.errors]
+
+
+def test_notes_named_like_documents_are_still_notes(tmp_path: Path):
+    """Payload beats filename, the same way it already does inside `artifacts/`."""
+    d = _notes(tmp_path)
+    for name in ("synthesis.md", "prior-art.md"):
+        (d / name).write_text("Not a document.\n", encoding="utf-8")
+    rels = _rels(tmp_path)
+    assert not [r for r in rels if r.startswith("notes/")], rels
+
+
+def test_notes_are_excluded_from_rollups(tmp_path: Path):
+    """Nothing derives from a note, so the model must not see one anywhere."""
+    from aorf.model import load
+
+    d = _notes(tmp_path)
+    (d / "2026-08-19-idea.md").write_text(
+        "---\ntitle: Idea\nbrief: Worth checking later.\n---\n\nBody.\n", encoding="utf-8"
+    )
+    m = load(tmp_path)
+    assert not [doc for doc in m.repo.docs if doc.rel.startswith("notes/")]
+    assert len(m.questions) == 1
+
+
+def test_a_nested_notes_directory_is_also_payload(tmp_path: Path):
+    """A question may keep its own notes; the rule is the directory name, not its position."""
+    build_repo(tmp_path)
+    d = tmp_path / "questions" / "the-thing" / "notes"
+    d.mkdir()
+    (d / "index.md").write_text("# Notes for this question\n", encoding="utf-8")
+    _, report = check_path(tmp_path, strict=True)
+    assert report.ok, [i.format() for i in report.errors]
 
 
 # --- not an AORF repo at all -------------------------------------------------------------
