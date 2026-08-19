@@ -54,6 +54,13 @@ jobs:
               echo "missing _site/demo/$name/index.html"; exit 1;
             }
           done
+          # Every example ships notes, and the Examples page links two of these directly.
+          # The notes page only exists when a repo has notes, so its absence is a real break.
+          for name in topic-clustering minimal-spike; do
+            test -f "_site/demo/$name/notes.html" || {
+              echo "missing _site/demo/$name/notes.html"; exit 1;
+            }
+          done
 
       - uses: actions/configure-pages@v5
         with:
