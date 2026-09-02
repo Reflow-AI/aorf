@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}Notes{% endblock %}
+{% block content %}
+
+<header class="doc-head">
+  <h1>Notes</h1>
+  <p class="lede">Thoughts recorded before they were worth structuring — an idea, an
+  observation, a doubt about a decision already made. Notes are not documents: nothing here is
+  validated, rolled up or counted, and nothing in the research derives from one.</p>
+</header>
+
+{% if intro %}
+<details class="note-intro">
+  <summary>About this directory</summary>
+  <div class="prose">{{ intro }}</div>
+</details>
+{% endif %}
+
+{% for group in groups %}
+<section>
+  <h2>{{ group.status | replace('_', ' ') | capitalize }} <span class="sub">{{ group['items'] | length }}</span></h2>
+  <ul class="notes">
+    {% for n in group['items'] %}
+    <li>
+      <div class="row">
+        <strong>{{ n.title }}</strong>
+        <span class="chip status-{{ n.status }}">{{ n.status }}</span>
+        {% if n.date %}<span class="mono sub">{{ n.date }}</span>{% endif %}
+        {% if n.dir != 'notes' %}<span class="chip">{{ n.dir }}</span>{% endif %}
+      </div>
+      {% if n.brief %}<p class="brief">{{ n.brief }}</p>{% endif %}
+      {% if n.promoted_link %}
+      <p class="sub">Promoted to:
+        {% if n.promoted_link.resolved %}<a href="{{ n.promoted_link.url }}">{{ n.promoted_link.label }}</a>{% else %}<span class="broken">{{ n.promoted_link.label }}</span>{% endif %}
+      </p>
+      {% endif %}
+      {% if n.dropped_reason %}<p class="sub">Dropped: {{ n.dropped_reason }}</p>{% endif %}
+      {% if n.body %}
+      <details class="note-body">
+        <summary>Full note</summary>
+        <div class="prose">{{ n.body }}</div>
+      </details>
+      {% endif %}
+      <p class="sub mono break">{{ n.rel }}</p>
+    </li>
+    {% endfor %}
+  </ul>
+</section>
+{% endfor %}
+
+{% if not groups %}
+<p class="empty">No notes yet. This directory appears the first time a thought is worth keeping
+but not yet worth structuring.</p>
+{% endif %}
+
+<p class="note">A note is promoted into a question, folded into an existing one, or dropped with
+its reason kept. Nothing is deleted: a rejected note is cheaper to keep than to re-derive.</p>
+
+{% endblock %}

@@ -15,9 +15,10 @@ An AORF document is:
 - any file named `index.md`, `synthesis.md` or `prior-art.md`, **or**
 - any `.md` file directly inside `datasets/` or `findings/`.
 
-`artifacts/`, `src/` and `shared/` are **payload directories**. Never validate their contents
-as documents; anything inside them is free-form content with any filename. `log.md`,
-`README.md` and this file are not documents either.
+`artifacts/`, `src/`, `shared/` and `notes/` are **payload directories**. Never validate their
+contents as documents; anything inside them is free-form content with any filename. This
+includes `notes/index.md`, which despite its name is a plain explainer and not a document.
+`log.md`, `README.md` and this file are not documents either.
 
 Layout:
 
@@ -29,6 +30,7 @@ Layout:
 ├── datasets/<name>.md type: dataset
 ├── findings/<slug>.md type: finding
 ├── shared/            payload: code used by more than one experiment
+├── notes/             payload: loose notes, one per file — see section 9
 └── questions/<slug>/
     ├── index.md       type: question
     ├── prior-art.md   type: prior-art, optional
@@ -38,8 +40,14 @@ Layout:
     │   ├── runs.jsonl required when kind: sweep
     │   ├── src/       payload
     │   └── artifacts/ payload: ALL outputs go here
-    └── questions/     optional nesting, same shape, 2 levels maximum
+    └── questions/     optional nesting, same shape, no fixed depth limit
 ```
+
+**On nesting depth.** Nest to whatever depth the research actually has. Depth follows the
+structure of the work — nest when a question genuinely splits into sub-questions that need
+their own status and answer, not to create shape. There is no numeric cap, and depth alone
+never fails validation. The link rules in section 2 apply unchanged at any depth, which is why
+anything climbing more than one `../` must be root-relative.
 
 ## 2. Link resolution
 
@@ -168,6 +176,27 @@ reference number makes every delta in the repo meaningless while looking rigorou
 and the expected cost, and get explicit approval from the user. Never run a broad
 multi-source search unprompted. If a `prior-art.md` exists for this question and its
 `valid_until` has not passed, read it instead of searching again.**
+
+## 9. Notes: capture without classifying
+
+`notes/` holds loose notes, one per file, outside the AORF structure entirely. Nothing in it is
+validated, rolled up or counted.
+
+**When the user offers a thought without asking for it to be structured — "this is just a note
+to check later", "take a note", "I had an idea", or simply an observation with no request
+attached — write a note. Do not create a question or an experiment for it, and do not ask which
+one it should become.** Structuring a thought is a decision the user makes on review, not a toll
+charged at the moment they have it.
+
+Write it as `notes/YYYY-MM-DD-short-slug.md`, with `title` and `brief` in frontmatter and the
+rest free markdown. Keep the user's framing and their emphasis — a note rewritten into what the
+agent found interesting about it is a different note. Where a thought clearly touches an
+existing question, say so in the body and link it; do not edit that question on the strength of
+a note.
+
+A note is promoted (`status: promoted`, with `promoted_to`) or rejected (`status: dropped`,
+with `dropped_reason`) only when the user decides it on review. A rejected note is kept, not
+deleted: it is cheaper to keep than to re-derive.
 
 ---
 

@@ -31,7 +31,7 @@ def build_parser() -> argparse.ArgumentParser:
     check = sub.add_parser("check", help="validate the repository; exit 1 on error")
     _add_path(check)
     check.add_argument(
-        "--strict", action="store_true", help="escalate stale generated regions and depth 4+"
+        "--strict", action="store_true", help="escalate stale generated regions to errors"
     )
     check.add_argument("--json", action="store_true", dest="as_json", help="machine-readable")
     check.add_argument(

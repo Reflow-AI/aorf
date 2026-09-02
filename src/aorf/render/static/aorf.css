@@ -119,11 +119,11 @@ main .banner, section .banner { margin: 0 0 20px; }
 .chip.warn { color: var(--warn); border-color: var(--warn); background: var(--warn-bg); }
 .status-active, .status-running, .status-open, .conc-open { color: var(--accent); border-color: var(--accent); }
 .status-answered, .status-done, .status-stable, .status-resolved, .status-concluded,
-.verdict-supported { color: var(--up); border-color: var(--up); background: var(--good-bg); }
+.status-promoted, .verdict-supported { color: var(--up); border-color: var(--up); background: var(--good-bg); }
 .verdict-refuted { color: var(--down); border-color: var(--down); background: var(--bad-bg); }
 .verdict-inconclusive, .status-paused, .status-draft, .status-planned, .conc-partially_solved,
 .verdict-pending { color: var(--warn); border-color: var(--warn); background: var(--warn-bg); }
-.status-abandoned, .status-deprecated, .status-blocked { color: var(--ink-3); }
+.status-abandoned, .status-deprecated, .status-blocked, .status-dropped { color: var(--ink-3); }
 .sev-blocking { color: var(--down); border-color: var(--down); background: var(--bad-bg); }
 .sev-important { color: var(--warn); border-color: var(--warn); background: var(--warn-bg); }
 
@@ -260,3 +260,21 @@ pre.code { overflow-x: auto; font-family: var(--mono); font-size: 12px; line-hei
   main, footer, .top { padding-left: 14px; padding-right: 14px; }
   .metric-big .value { font-size: 26px; }
 }
+
+/* --- notes --- */
+/* Visibly lighter than the document lists: a note carries none of their standing. */
+.notes { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.notes > li {
+  border: 1px dashed var(--line-2); border-radius: 8px; padding: 12px 14px;
+  background: var(--bg);
+}
+.notes .row { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.notes .brief { margin: 6px 0 0; color: var(--ink-2); max-width: 74ch; }
+.note-intro { margin-bottom: 20px; color: var(--ink-2); }
+.note-intro > summary { cursor: pointer; font-size: 12px; color: var(--ink-3); }
+.note-intro > summary:hover { color: var(--ink-2); }
+.note-intro .prose { margin-top: 10px; max-width: 74ch; }
+.note-body { margin-top: 8px; }
+.note-body > summary { cursor: pointer; font-size: 12px; color: var(--ink-3); }
+.note-body > summary:hover { color: var(--ink-2); }
+.note-body .prose { margin-top: 8px; }

@@ -17,7 +17,10 @@ AORF_VERSION = "0.1"
 
 # --- document discovery (spec 3.2) -------------------------------------------------------
 # Reserved payload directories. Never scanned for documents; contents are free-form.
-PAYLOAD_DIRS = frozenset({"artifacts", "src", "shared"})
+# `notes/` is payload for the same reason as the rest, and the reason it matters is that it
+# is the one payload directory whose natural explainer is called `index.md`. Being payload
+# is what exempts `notes/index.md` from DOC_FILENAMES below.
+PAYLOAD_DIRS = frozenset({"artifacts", "src", "shared", "notes"})
 # Filenames that are documents wherever they appear outside a payload directory.
 DOC_FILENAMES = frozenset({"index.md", "synthesis.md", "prior-art.md"})
 # Directories whose direct .md children are documents.
@@ -38,6 +41,9 @@ VERDICT_STATES = ("current", "invalidated", "superseded")
 DIRECTIONS = ("higher_is_better", "lower_is_better")
 DATASET_ROLES = ("eval", "train", "reference")
 STORAGE = ("git", "git-lfs", "none", "external")
+# `notes/` only. Recommended, never required and never validated — a note may carry no
+# frontmatter at all. Declared here so the dashboard can order the sections it groups by.
+NOTE_STATUS = ("open", "promoted", "dropped")
 PRIOR_ART_CONCLUSIONS = ("solved", "partially_solved", "open")
 FINDING_SCOPES = ("repo", "question")
 SEVERITIES = ("info", "important", "blocking")
@@ -306,8 +312,13 @@ GEN_BEGIN = "<!-- AORF:BEGIN generated -->"
 GEN_END = "<!-- AORF:END generated -->"
 
 # --- limits -----------------------------------------------------------------------------
-DEPTH_WARN = 3  # root index.md is depth 0; questions/<slug>/ is depth 1
-DEPTH_ERROR = 4  # error under --strict
+# Nesting depth is not capped. Decomposition depth is a property of the research being
+# described, not of the format describing it, so a numeric cap eventually contradicts the
+# structure it exists to record — and it does not prevent deep structure, it relocates it
+# into slugs where no tooling can see it. What the cap was protecting against is long,
+# hand-written cross-tree paths, and R25 addresses that directly at any depth.
+# Past this many levels the checker says so and nothing more: informational, never an error.
+DEPTH_NOTE = 5  # root index.md is depth 0; questions/<slug>/ is depth 1
 STALE_RUNNING_DAYS = 30
 MINIMAL_MODE_SYNTHESIS_AT = 3  # experiments, before which a question owes no synthesis
 

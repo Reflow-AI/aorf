@@ -336,5 +336,6 @@ def load(path: Path | str) -> Model:
     return build(parse.discover(Path(path)))
 
 
-def default_depth_limits() -> tuple[int, int]:
-    return spec.DEPTH_WARN, spec.DEPTH_ERROR
+def default_depth_note() -> int:
+    """The depth past which the checker remarks on a tree. It never rejects one."""
+    return spec.DEPTH_NOTE

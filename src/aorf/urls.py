@@ -12,7 +12,7 @@ from __future__ import annotations
 
 import re
 
-PAGES = ("index", "ledger", "progress", "datasets", "findings")
+PAGES = ("index", "ledger", "progress", "datasets", "findings", "notes")
 
 _SLUG_STRIP = re.compile(r"[^a-z0-9]+")
 

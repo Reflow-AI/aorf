@@ -490,22 +490,20 @@ def r16_generated_regions_current(m: Model):
 
 
 def r17_depth(m: Model):
-    """Nesting deeper than 2 warns; deeper than 3 errors under --strict."""
+    """Deep nesting is noted, never rejected. Depth is the research's business, not the format's.
+
+    A tree is only ever wrong about its depth in one direction — nodes that are not genuinely
+    distinct questions — and that is a judgement the checker cannot make. So it points at the
+    tree and lets the author decide. It never escalates, including under --strict.
+    """
     for q in _questions(m):
-        if q.depth >= spec.DEPTH_ERROR:
+        if q.depth >= spec.DEPTH_NOTE:
             yield Issue(
-                WARNING,
+                INFO,
                 "R17",
                 q.rel,
-                f"question nesting depth {q.depth}; at this depth cross-tree paths become "
-                f"unreadable and unwritable by hand. Split the research instead",
-            )
-        elif q.depth >= spec.DEPTH_WARN:
-            yield Issue(
-                WARNING,
-                "R17",
-                q.rel,
-                f"question nesting depth {q.depth}; 2 is the practical limit",
+                f"question nesting depth {q.depth}; worth checking these are genuinely "
+                f"distinct questions rather than shape. Not an error",
             )
 
 
@@ -856,7 +854,6 @@ RULES = [
 
 # Rules whose level is raised from warning to error by --strict, per spec 3.12.
 STRICT_ESCALATE = {"R16"}
-STRICT_ESCALATE_DEEP_ONLY = {"R17"}
 
 
 def run(m: Model, strict: bool = False) -> Report:
@@ -868,12 +865,6 @@ def run(m: Model, strict: bool = False) -> Report:
         escalated = []
         for issue in issues:
             if issue.level == WARNING and issue.rule in STRICT_ESCALATE:
-                issue = Issue(ERROR, issue.rule, issue.path, issue.message)
-            elif (
-                issue.level == WARNING
-                and issue.rule in STRICT_ESCALATE_DEEP_ONLY
-                and f"depth {spec.DEPTH_ERROR}" in issue.message
-            ):
                 issue = Issue(ERROR, issue.rule, issue.path, issue.message)
             escalated.append(issue)
         issues = escalated
